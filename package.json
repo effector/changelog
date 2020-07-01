@@ -1,0 +1,37 @@
+{
+  "name": "effector-changelog-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/effector-js/changelog.git",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "fetchData": "sh ./fetch-npm-info.sh",
+    "build": "npx rollup -c rollup.config.js && node dist/index.js"
+  },
+  "dependencies": {
+    "cross-fetch": "^3.0.5",
+    "dotenv": "^8.2.0",
+    "effector": "^20.17.2",
+    "forest": "^0.16.8",
+    "fs-extra": "^9.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/generator": "^7.10.4",
+    "@babel/parser": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
+    "@babel/template": "^7.10.4",
+    "@babel/traverse": "^7.10.4",
+    "@babel/types": "^7.10.4",
+    "@rollup/plugin-babel": "^5.0.4",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^8.1.0",
+    "@rollup/plugin-replace": "^2.3.3",
+    "rollup": "^2.18.1",
+    "rollup-plugin-postcss": "^3.1.2",
+    "stylis": "^4.0.2",
+    "typescript": "^3.9.6"
+  }
+}

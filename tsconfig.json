@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "module": "es2015",
+    "target": "esnext",
+    "jsx": "react",
+    "allowJs": false,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "lib": ["dom", "esnext"]
+  },
+  "exclude": [
+    "./dist",
+    "./coverage",
+    "./benchmarks",
+    "./doc",
+    "./examples",
+    "./bin"
+  ]
+}
