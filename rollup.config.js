@@ -10,6 +10,7 @@ import {extractCssPlugin} from './builder/extractCssPlugin'
 
 export default {
   input: ENTRY,
+  cache: false,
   output: {
     dir: './dist',
     format: 'commonjs',
