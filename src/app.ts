@@ -1,22 +1,31 @@
-import {h, spec, DOMProperty, AttributeStore} from 'forest'
+import {h, spec} from 'forest'
 
 import {AstToken, extractText} from './mdParser'
 
 import {USE_UNIQUE_ID, MANY_LINES, LARGE_ARTICLE} from './env'
 import {VersionDate} from './index.h'
 
-import './styles'
+import {styles} from './styles'
 
 type ReleaseNote = {
   version: string
+  releaseID: string
+  date: number
   library: 'effector' | 'react' | 'vue'
   content: AstToken[]
   manyLines: boolean
   largeArticle: boolean
 }
 
+type ReleaseGroup = {
+  library: string
+  groupID: string
+  releases: ReleaseNote[]
+}
+
 export function App(sections: AstToken[][], versionDates: VersionDate[]) {
   const ids = new Map<string, number>()
+  const releaseGroups = createReleaseGroups(sections)
 
   h('html', () => {
     h('head', () => {
@@ -27,118 +36,11 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
     })
   })
 
-  function getId(title: string) {
-    title = formatId(title)
-    if (!ids.has(title) || !USE_UNIQUE_ID) {
-      ids.set(title, 1)
-      return title
-    }
-    const id = ids.get(title)!
-    ids.set(title, id + 1)
-    return `${title}-${id}`
-  }
-  function queryVersionDate(library: string, version: string) {
-    const versions = version.match(/(\d+\.\d+\.\d+(-[a-z]+[a-z0-9.]*)?)/g)!
-    const results = [] as Array<{version: string; date: number}>
-    for (const version of versions) {
-      const versionDate = versionDates.find(
-        e => e.library === library && e.version === version
-      )
-      if (!versionDate) {
-        console.warn(`no version info found for ${library} ${version}`)
-        continue
-      }
-      const {date} = versionDate
-      results.push({
-        version,
-        date
-      })
-    }
-    return results
-  }
   function Body() {
-    const releases = [] as ReleaseNote[]
-    for (const releaseNotesAst of sections) {
-      const titleText = extractText([releaseNotesAst[0]]).join('')
-      const effReactMentioned = /effector\-react/.test(titleText)
-      const effVueMentioned = /effector\-vue/.test(titleText)
-      const effectorMentioned = /effector(?!\-)/.test(titleText)
-      const content = releaseNotesAst.slice(1)
-      const textContent = extractText(content, {
-        skipNodes: ['code'],
-        keepLineBreaks: true
-      }).join('')
-      const manyLines = textContent.split(/\n/g).length > MANY_LINES
-      const largeArticle = textContent.length > LARGE_ARTICLE
-      // console.log({
-      //   title: titleText,
-      //   content: textContent.length,
-      //   lines: textContent.split(/\n/g).length,
-      //   manyLines,
-      //   largeArticle
-      // })
-      if (effectorMentioned && !effVueMentioned && !effReactMentioned) {
-        releases.push({
-          version: titleText.replace('effector', '').trim(),
-          library: 'effector',
-          content,
-          manyLines,
-          largeArticle
-        })
-      } else if (!effectorMentioned && !effVueMentioned && !effReactMentioned) {
-        releases.push({
-          version: titleText,
-          library: 'effector',
-          content,
-          manyLines,
-          largeArticle
-        })
-      } else {
-        if (effectorMentioned) {
-          const versionMatcher = /(?<=effector[^-]).*?(\d+\.\d+\.\d+(-\d+\.\d+\.\d+)?)/gm
-          const [, version] = versionMatcher.exec(titleText)!
-          releases.push({
-            version: version,
-            library: 'effector',
-            content,
-            manyLines,
-            largeArticle
-          })
-        }
-        if (effReactMentioned) {
-          const versionMatcher = /(?<=effector-react).*?(\d+\.\d+\.\d+)/gm
-          const [, version] = versionMatcher.exec(titleText)!
-          releases.push({
-            version: version,
-            library: 'react',
-            content,
-            manyLines,
-            largeArticle
-          })
-        }
-        if (effVueMentioned) {
-          const versionMatcher = /(?<=effector-vue).*?(\d+\.\d+\.\d+)/gm
-          const [, version] = versionMatcher.exec(titleText)!
-          releases.push({
-            version: version,
-            library: 'vue',
-            content,
-            manyLines,
-            largeArticle
-          })
-        }
-      }
-    }
-    const effectorReleases = releases.filter(
-      ({library}) => library === 'effector'
-    )
-    const reactReleases = releases.filter(({library}) => library === 'react')
-    const vueReleases = releases.filter(({library}) => library === 'vue')
-
     h('div', {
-      data: {fillTop: true},
       attr: {'aria-hidden': 'true'},
-      text: '.'
+      text: '.',
+      fn: styles.topFiller
     })
     h('section', {
       data: {releaseList: true, appSection: 'docs'},
@@ -152,62 +54,61 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
         h('nav', {
           data: {releaseGroupNav: true},
           fn() {
-            h('a', {
-              attr: {href: `#${formatId('effector')}`},
-              text: 'effector'
-            })
-            h('a', {
-              attr: {href: `#${formatId('effector-react')}`},
-              text: 'effector-react'
-            })
-            h('a', {
-              attr: {href: `#${formatId('effector-vue')}`},
-              text: 'effector-vue'
-            })
+            for (const {library, groupID} of releaseGroups) {
+              h('a', {
+                attr: {href: `#${groupID}`},
+                text: library
+              })
+            }
           }
         })
-        ReleaseGroup('effector', effectorReleases)
-        ReleaseGroup('effector-react', reactReleases)
-        ReleaseGroup('effector-vue', vueReleases)
+        for (const releaseGroup of releaseGroups) {
+          ReleaseGroup(releaseGroup)
+        }
       }
     })
   }
-  function ReleaseGroup(name: string, releases: ReleaseNote[]) {
-    const releaseGroupId = getId(name)
-    HiddenLink(name, true)
+  function ReleaseGroup({library, groupID, releases}: ReleaseGroup) {
+    HiddenLink(groupID, true)
     h('section', {
-      data: {releaseGroup: true},
       fn() {
+        styles.releaseGroup()
         h('header', () => {
           h('h2', {
             data: {headLink: 2},
             fn() {
               h('a', {
-                attr: {href: `#${releaseGroupId}`},
-                text: name
+                attr: {href: `#${groupID}`},
+                text: library
               })
             }
           })
         })
-        for (const {version, content, manyLines, largeArticle} of releases) {
-          const id = getId(`${name} ${version}`)
-          const {date} = queryVersionDate(name, version)[0]
+        for (const {
+          version,
+          content,
+          manyLines,
+          largeArticle,
+          releaseID,
+          date
+        } of releases) {
           const dateString = new Date(date).toLocaleDateString(['en-US'], {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
           })
           const dateISO = new Date(date).toISOString()
-          HiddenLink(`${name} ${version}`)
+          HiddenLink(releaseID)
           h('article', {
-            data: {release: true, manyLines, largeArticle},
+            data: {manyLines, largeArticle},
             fn() {
+              styles.release()
               h('header', () => {
                 h('h3', {
                   data: {headLink: 3},
                   fn() {
                     h('a', {
-                      attr: {href: `#${id}`},
+                      attr: {href: `#${releaseID}`},
                       text: version
                     })
                   }
@@ -224,11 +125,11 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
       }
     })
   }
-  function HiddenLink(name: string, groupLink: boolean = false) {
+  function HiddenLink(linkID: string, groupLink: boolean = false) {
     h('a', {
       data: {anchor: groupLink ? 'group' : 'release'},
       attr: {
-        id: getId(name),
+        id: linkID,
         'aria-hidden': 'true'
       },
       text: ' '
@@ -347,6 +248,137 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
           attr: {src: token.href}
         })
         break
+    }
+  }
+  function getId(title: string) {
+    title = formatId(title)
+    if (!ids.has(title) || !USE_UNIQUE_ID) {
+      ids.set(title, 1)
+      return title
+    }
+    const id = ids.get(title)!
+    ids.set(title, id + 1)
+    return `${title}-${id}`
+  }
+
+  function createReleaseGroups(sections: AstToken[][]): ReleaseGroup[] {
+    const releaseNotes = {
+      effector: [] as ReleaseNote[],
+      effectorReact: [] as ReleaseNote[],
+      effectorVue: [] as ReleaseNote[]
+    }
+    for (const releaseNotesAst of sections) {
+      const titleText = extractText([releaseNotesAst[0]]).join('')
+      const effReactMentioned = /effector\-react/.test(titleText)
+      const effVueMentioned = /effector\-vue/.test(titleText)
+      const effectorMentioned = /effector(?!\-)/.test(titleText)
+      const content = releaseNotesAst.slice(1)
+      const textContent = extractText(content, {
+        skipNodes: ['code'],
+        keepLineBreaks: true
+      }).join('')
+      const manyLines = textContent.split(/\n/g).length > MANY_LINES
+      const largeArticle = textContent.length > LARGE_ARTICLE
+      if (effectorMentioned && !effVueMentioned && !effReactMentioned) {
+        const version = titleText.replace('effector', '').trim()
+        releaseNotes.effector.push({
+          version,
+          library: 'effector',
+          content,
+          manyLines,
+          largeArticle,
+          releaseID: getId(`effector ${version}`),
+          date: findReleaseDate('effector', version)
+        })
+      } else if (!effectorMentioned && !effVueMentioned && !effReactMentioned) {
+        releaseNotes.effector.push({
+          version: titleText,
+          library: 'effector',
+          content,
+          manyLines,
+          largeArticle,
+          releaseID: getId(`effector ${titleText}`),
+          date: findReleaseDate('effector', titleText)
+        })
+      } else {
+        if (effectorMentioned) {
+          const versionMatcher = /(?<=effector[^-]).*?(\d+\.\d+\.\d+(-\d+\.\d+\.\d+)?)/gm
+          const [, version] = versionMatcher.exec(titleText)!
+          releaseNotes.effector.push({
+            version,
+            library: 'effector',
+            content,
+            manyLines,
+            largeArticle,
+            releaseID: getId(`effector ${version}`),
+            date: findReleaseDate('effector', version)
+          })
+        }
+        if (effReactMentioned) {
+          const versionMatcher = /(?<=effector-react).*?(\d+\.\d+\.\d+)/gm
+          const [, version] = versionMatcher.exec(titleText)!
+          releaseNotes.effectorReact.push({
+            version,
+            library: 'react',
+            content,
+            manyLines,
+            largeArticle,
+            releaseID: getId(`effector-react ${version}`),
+            date: findReleaseDate('effector-react', version)
+          })
+        }
+        if (effVueMentioned) {
+          const versionMatcher = /(?<=effector-vue).*?(\d+\.\d+\.\d+)/gm
+          const [, version] = versionMatcher.exec(titleText)!
+          releaseNotes.effectorVue.push({
+            version,
+            library: 'vue',
+            content,
+            manyLines,
+            largeArticle,
+            releaseID: getId(`effector-vue ${version}`),
+            date: findReleaseDate('effector-vue', version)
+          })
+        }
+      }
+    }
+    const {
+      effector: effectorReleases,
+      effectorReact: reactReleases,
+      effectorVue: vueReleases
+    } = releaseNotes
+
+    return [
+      {
+        library: 'effector',
+        groupID: formatId('effector'),
+        releases: effectorReleases
+      },
+      {
+        library: 'effector-react',
+        groupID: formatId('effector-react'),
+        releases: reactReleases
+      },
+      {
+        library: 'effector-vue',
+        groupID: formatId('effector-vue'),
+        releases: vueReleases
+      }
+    ]
+
+    function findReleaseDate(library: string, version: string) {
+      const versions = version.match(/(\d+\.\d+\.\d+(-[a-z]+[a-z0-9.]*)?)/g)!
+      for (const version of versions) {
+        const versionDate = versionDates.find(
+          e => e.library === library && e.version === version
+        )
+        if (!versionDate) {
+          console.warn(`no version info found for ${library} ${version}`)
+          continue
+        }
+        return versionDate.date
+      }
+      return -1
     }
   }
 }

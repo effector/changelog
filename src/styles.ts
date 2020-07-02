@@ -1,13 +1,87 @@
 import {DOMProperty, AttributeStore} from 'forest'
 
-declare const css: (
-  words: TemplateStringsArray,
-  ...values: Array<DOMProperty | AttributeStore>
-) => void
-declare const createGlobalStyle: (
-  words: TemplateStringsArray,
-  ...values: Array<DOMProperty | AttributeStore>
-) => void
+export const styles = {
+  topFiller() {
+    css`
+      position: fixed;
+      width: 100%;
+      line-height: var(--viewportPaddingTop);
+      top: 0;
+      background: var(--white-3);
+      z-index: 5;
+      color: var(--white-3);
+    `
+  },
+  releaseGroup() {
+    css`
+      position: relative;
+      grid-column: span 3;
+
+      & > header {
+        position: -webkit-sticky;
+        position: sticky;
+        top: var(--viewportPaddingTop);
+        background: var(--white-3);
+        z-index: 1;
+        line-height: var(--md-4);
+      }
+      & > header a {
+        text-decoration: none;
+      }
+
+      @media only screen and (max-width: 768px) {
+        & > header {
+          z-index: 3;
+          top: calc(var(--viewportPaddingTop) + var(--md-5));
+        }
+      }
+
+      &:first-of-type > header > [data-head-link='2'] {
+        margin-block-start: var(--md-5);
+        -webkit-margin-before: var(--md-5);
+      }
+    `
+  },
+  release() {
+    css`
+      position: relative;
+      display: grid;
+
+      & > header {
+        background: var(--white-3);
+        top: calc(var(--viewportPaddingTop));
+        line-height: var(--md-5);
+        display: grid;
+        grid-template-columns: minmax(max-content, 80px) auto;
+        justify-content: start;
+        column-gap: var(--md);
+      }
+
+      &[data-large-article] > header,
+      &[data-many-lines] > header {
+        position: -webkit-sticky;
+        position: sticky;
+      }
+
+      & > header > time {
+        align-self: end;
+        font-style: italic;
+        color: var(--gray-1);
+      }
+
+      & > header a {
+        text-decoration: none;
+      }
+
+      @media only screen and (max-width: 768px) {
+        & > header {
+          z-index: 1;
+          top: calc(var(--viewportPaddingTop) + var(--md-5));
+        }
+      }
+    `
+  }
+}
 
 createGlobalStyle`
 :root {
@@ -354,72 +428,6 @@ code {
     z-index: 4;
   }
 }
-[data-release-group] {
-  position: relative;
-  grid-column: span 3;
-}
-[data-release-group] > header {
-  position: -webkit-sticky;
-  position: sticky;
-  top: var(--viewportPaddingTop);
-  background: var(--white-3);
-  z-index: 1;
-  line-height: var(--md-4);
-}
-[data-release-group] > header a {
-  text-decoration: none;
-}
-[data-release] {
-  position: relative;
-  display: grid;
-}
-[data-release] > header {
-  background: var(--white-3);
-  top: calc(var(--viewportPaddingTop));
-  line-height: var(--md-5);
-  display: grid;
-  grid-template-columns: minmax(max-content, 80px) auto;
-  justify-content: start;
-  column-gap: var(--md);
-}
-[data-release] > header > time {
-  align-self: end;
-  font-style: italic;
-  color: var(--gray-1);
-}
-[data-release][data-large-article] > header,
-[data-release][data-many-lines] > header {
-  position: -webkit-sticky;
-  position: sticky;
-}
-
-[data-release] > header a {
-  text-decoration: none;
-}
-[data-fill-top] {
-  position: fixed;
-  width: 100%;
-  line-height: var(--viewportPaddingTop);
-  top: 0;
-  background: var(--white-3);
-  z-index: 5;
-  color: var(--white-3);
-}
-@media only screen and (max-width: 768px) {
-  [data-release-group] > header {
-    z-index: 3;
-    top: calc(var(--viewportPaddingTop) + var(--md-5));
-  }
-  [data-release] > header {
-    z-index: 1;
-    top: calc(var(--viewportPaddingTop) + var(--md-5));
-  }
-}
-
-[data-release-group]:first-of-type > header > [data-head-link='2'] {
-  margin-block-start: var(--md-5);
-  -webkit-margin-before: var(--md-5);
-}
 [data-anchor] {
   position: relative;
   top: var(--top, 0);
@@ -456,3 +464,12 @@ code {
 }
 
 `
+
+declare const css: (
+  words: TemplateStringsArray,
+  ...values: Array<DOMProperty | AttributeStore>
+) => void
+declare const createGlobalStyle: (
+  words: TemplateStringsArray,
+  ...values: Array<DOMProperty | AttributeStore>
+) => void
