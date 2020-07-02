@@ -43,8 +43,9 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
       fn: styles.topFiller
     })
     h('section', {
-      data: {releaseList: true, appSection: 'docs'},
+      data: {appSection: 'docs'},
       fn() {
+        styles.releaseList()
         h('header', () => {
           h('h1', {
             data: {headLink: 1},
@@ -52,8 +53,8 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
           })
         })
         h('nav', {
-          data: {releaseGroupNav: true},
           fn() {
+            styles.navigation()
             for (const {library, groupID} of releaseGroups) {
               h('a', {
                 attr: {href: `#${groupID}`},
@@ -132,7 +133,8 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
         id: linkID,
         'aria-hidden': 'true'
       },
-      text: ' '
+      text: ' ',
+      fn: styles.anchor
     })
   }
 
