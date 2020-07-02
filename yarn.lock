@@ -1749,10 +1749,10 @@ fastparse@^1.1.2:
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.2.tgz#91728c5a5942eced8531283c79441ee4122c35a9"
   integrity sha512-483XLLxTVIwWK3QTrMGRqUfUpoOs/0hbQrl2oz4J0pAcm3A3bu84wxTFqGqkJzewCLdME38xJLJAxBABfQT8sQ==
 
-forest@^0.16.8:
-  version "0.16.8"
-  resolved "https://registry.yarnpkg.com/forest/-/forest-0.16.8.tgz#de818b8a384a887dc1ec0097deaaccd41729d75a"
-  integrity sha512-CuwGeLLgWCEtaiNScrsLnmU0ye4vTvO7j0KtFM2xNCKC2HGRdM0ncIoRkFCvrFeR3HvHyboUGRRSeJjkIlK+sA==
+forest@^0.16.9:
+  version "0.16.9"
+  resolved "https://registry.yarnpkg.com/forest/-/forest-0.16.9.tgz#41b83da6c28f6e0ed18a669df8d995483919ffd3"
+  integrity sha512-KWdCMAhfqogFFfHmkdtxyE/7dUbeAE8HUpWOT/wg1IzKloTJ901JAEJCjSZqdlHoJGMWPl6IcLdwHI8WTSsHGA==
 
 forever-agent@~0.6.1:
   version "0.6.1"
