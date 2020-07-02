@@ -33,12 +33,12 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
       ids.set(title, 1)
       return title
     }
-    const id = ids.get(title)
+    const id = ids.get(title)!
     ids.set(title, id + 1)
     return `${title}-${id}`
   }
   function queryVersionDate(library: string, version: string) {
-    const versions = version.match(/(\d+\.\d+\.\d+(-[a-z]+[a-z0-9.]*)?)/g)
+    const versions = version.match(/(\d+\.\d+\.\d+(-[a-z]+[a-z0-9.]*)?)/g)!
     const results = [] as Array<{version: string; date: number}>
     for (const version of versions) {
       const versionDate = versionDates.find(
@@ -96,7 +96,7 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
       } else {
         if (effectorMentioned) {
           const versionMatcher = /(?<=effector[^-]).*?(\d+\.\d+\.\d+(-\d+\.\d+\.\d+)?)/gm
-          const [, version] = versionMatcher.exec(titleText)
+          const [, version] = versionMatcher.exec(titleText)!
           releases.push({
             version: version,
             library: 'effector',
@@ -107,7 +107,7 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
         }
         if (effReactMentioned) {
           const versionMatcher = /(?<=effector-react).*?(\d+\.\d+\.\d+)/gm
-          const [, version] = versionMatcher.exec(titleText)
+          const [, version] = versionMatcher.exec(titleText)!
           releases.push({
             version: version,
             library: 'react',
@@ -118,7 +118,7 @@ export function App(sections: AstToken[][], versionDates: VersionDate[]) {
         }
         if (effVueMentioned) {
           const versionMatcher = /(?<=effector-vue).*?(\d+\.\d+\.\d+)/gm
-          const [, version] = versionMatcher.exec(titleText)
+          const [, version] = versionMatcher.exec(titleText)!
           releases.push({
             version: version,
             library: 'vue',

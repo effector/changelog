@@ -18,5 +18,6 @@
     "./doc",
     "./examples",
     "./bin"
-  ]
+  ],
+  "include": ["./src"]
 }

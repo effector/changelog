@@ -1,7 +1,6 @@
 require('dotenv').config()
 
 import babel from '@rollup/plugin-babel'
-import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import postcss from 'rollup-plugin-postcss'
@@ -23,7 +22,14 @@ export default {
     }
   },
   preserveEntrySignatures: false,
-  external: ['forest', 'forest/server', 'fs-extra', 'cross-fetch', 'path'],
+  external: [
+    'forest',
+    'forest/server',
+    'fs-extra',
+    'cross-fetch',
+    'pacote',
+    'path'
+  ],
   plugins: [
     replace({
       'process.env.GITHUB_GQL_TOKEN': `"${
@@ -31,7 +37,6 @@ export default {
       }"`
     }),
     extractCssPlugin(),
-    json(),
     babel({
       babelHelpers: 'bundled',
       extensions: ['.js', '.ts', '.mjs'],
