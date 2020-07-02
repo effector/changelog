@@ -1,21 +1,22 @@
 import {resolve} from 'path'
 //@ts-ignore
-import {outputFile} from 'fs-extra'
+import {outputFile, copy} from 'fs-extra'
 import {renderStatic} from 'forest/server'
 
 import {App} from './app'
 import {fetchData} from './fetchData'
 
-const HTML_FILE_OUTPUT = resolve(__dirname, 'index.html')
-
-run()
-
-async function run() {
+async function generateStatic() {
   const {sections, versionDates} = await fetchData()
 
   const rendered = await renderStatic(() => {
     App(sections, versionDates)
   })
 
-  await outputFile(HTML_FILE_OUTPUT, rendered)
+  await Promise.all([
+    outputFile(resolve(__dirname, 'index.html'), rendered),
+    copy(resolve(process.cwd(), 'src', 'assets'), resolve(__dirname, 'assets'))
+  ])
 }
+
+generateStatic()
