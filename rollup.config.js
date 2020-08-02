@@ -5,8 +5,8 @@ import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import postcss from 'rollup-plugin-postcss'
 
-import {ENTRY} from './builder/env'
-import {extractCssPlugin} from './builder/extractCssPlugin'
+import {ENTRY, PROJECT} from './builder/env'
+import {extractCss} from './builder/extractCssPlugin'
 
 export default {
   input: ENTRY,
@@ -26,6 +26,7 @@ export default {
   external: [
     'forest',
     'forest/server',
+    'prettier',
     'fs-extra',
     'cross-fetch',
     'pacote',
@@ -37,7 +38,7 @@ export default {
         process.env.GITHUB_GQL_TOKEN || 'no token'
       }"`
     }),
-    extractCssPlugin(),
+    extractCss({project: PROJECT}),
     babel({
       babelHelpers: 'bundled',
       extensions: ['.js', '.ts', '.mjs'],

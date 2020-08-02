@@ -1,40 +1,32 @@
+import {relative} from 'path'
+
+import {serialize, compile, stringify} from 'stylis'
 import generate from '@babel/generator'
 import {parse} from '@babel/parser'
 import t from '@babel/types'
 import traverse from '@babel/traverse'
 import template from '@babel/template'
 
-import {serialize, compile, stringify} from 'stylis'
-
-import {relative} from 'path'
-
-import {PROJECT} from './env'
-
-const isTsProjectFile = new RegExp(`.*${PROJECT}\/.*\.ts$`, 'gi')
-const mathFileName = new RegExp(`(?<=.*${PROJECT}\/)(.*)(?=\.ts$)`, 'gi')
-
 const specDataCall = template('cssSpec({data: {ID: true}})')
 const specDataVarCall = template('cssSpec({data: {ID: true},styleVar: VAR})')
 
-export const extractCssPlugin = () => {
+export function extractCss({project}) {
   const root = process.cwd()
   const cssLookup = new Map()
+  const mathFileName = new RegExp(`(?<=.*${project}\/)(.*)(?=\.ts$)`, 'gi')
   return {
     name: 'forest-extract-css',
-    load(id) {
-      if (id.endsWith('_forest.css')) return cssLookup.get(id)
-    },
-    resolveId(source, importer) {
-      if (source.endsWith('_forest.css')) return source
-    },
-    async transform(code, id) {
-      if (isTsProjectFile.test(id)) {
+    transform(code, id) {
+      if (String(id).match(mathFileName)) {
         const sourceFileName = relative(root, id)
         const [fileName] = String(id).match(mathFileName)
+        const hasCss =
+          code.includes('css`') || code.includes('createGlobalStyle`')
+        if (!hasCss) return null
         const cssRecords = []
         const ast = parse(code, {
           sourceType: 'module',
-          plugins: ['typescript'],
+          plugins: ['typescript']
         })
         function processStyleCall(methodName, index, path) {
           const node = path.node
@@ -44,10 +36,10 @@ export const extractCssPlugin = () => {
 
           if (t.isObjectExpression(config)) {
             const styleProp = config.properties.find(
-              (prop) =>
+              prop =>
                 t.isIdentifier(prop.key) &&
                 prop.key.name === 'style' &&
-                t.isObjectExpression(prop.value),
+                t.isObjectExpression(prop.value)
             )
 
             if (styleProp) {
@@ -60,7 +52,7 @@ export const extractCssPlugin = () => {
                   const sid = generateStableID(sourceFileName, property.start)
                   let cssPropName = property.key.name.replace(
                     /[A-Z]/g,
-                    (char) => `-${char.toLowerCase()}`,
+                    char => `-${char.toLowerCase()}`
                   )
                   if (
                     property.key.name.startsWith('webkit') ||
@@ -77,22 +69,22 @@ export const extractCssPlugin = () => {
                   } else {
                     cssFields.push(`${cssPropName}: var(--${sid});`)
                     styleVarProperties.push(
-                      t.objectProperty(t.identifier(sid), property.value),
+                      t.objectProperty(t.identifier(sid), property.value)
                     )
                     toRemove.push(property)
                   }
                 }
               }
-              toRemove.forEach((property) => {
+              toRemove.forEach(property => {
                 styleProp.value.properties.splice(
                   styleProp.value.properties.indexOf(property),
-                  1,
+                  1
                 )
               })
               if (styleProp.value.properties.length === 0) {
                 config.properties.splice(
                   config.properties.indexOf(styleProp),
-                  1,
+                  1
                 )
               }
               const css = `[data-${styleSID}] {${cssFields.join(' ')}}`
@@ -102,7 +94,7 @@ export const extractCssPlugin = () => {
               const newConfigFields = [
                 t.objectProperty(
                   t.identifier('styleVar'),
-                  t.objectExpression(styleVarProperties),
+                  t.objectExpression(styleVarProperties)
                 ),
                 // t.objectProperty(t.identifier('rawCss'), t.stringLiteral(css)),
                 t.objectProperty(
@@ -110,14 +102,14 @@ export const extractCssPlugin = () => {
                   t.objectExpression([
                     t.objectProperty(
                       t.identifier(styleSID),
-                      t.booleanLiteral(true),
-                    ),
-                  ]),
-                ),
+                      t.booleanLiteral(true)
+                    )
+                  ])
+                )
               ]
               if (config.properties.length > 0) {
                 newConfigFields.push(
-                  t.objectProperty(t.identifier('ɔ'), config),
+                  t.objectProperty(t.identifier('ɔ'), config)
                 )
               }
               node.arguments[index] = t.objectExpression(newConfigFields)
@@ -144,17 +136,17 @@ export const extractCssPlugin = () => {
             }
             if (!cssSpecImportInserted) {
               cssSpecImportInserted = true
-              const programPath = path.find((path) => path.isProgram())
+              const programPath = path.find(path => path.isProgram())
               programPath.node.body.unshift(
                 t.importDeclaration(
                   [
                     t.importSpecifier(
                       t.identifier('cssSpec'),
-                      t.identifier('spec'),
-                    ),
+                      t.identifier('spec')
+                    )
                   ],
-                  t.stringLiteral('forest'),
-                ),
+                  t.stringLiteral('forest')
+                )
               )
             }
             const sid = generateStableID(sourceFileName, node.start)
@@ -176,13 +168,13 @@ export const extractCssPlugin = () => {
               styleParts[styleParts.length - 1] += getQuasiValue(lastQuasi)
               replacement = specDataVarCall({
                 ID: t.identifier(sid),
-                VAR: t.objectExpression(vars),
+                VAR: t.objectExpression(vars)
               })
             }
             if (!isGlobalStyle) styleParts.push(`}`)
             const fullStyle = serialize(
               compile(styleParts.join(`\n`)),
-              stringify,
+              stringify
             )
             cssRecords.push(fullStyle)
             if (isGlobalStyle) {
@@ -190,20 +182,30 @@ export const extractCssPlugin = () => {
             } else {
               path.replaceWith(replacement)
             }
-          },
+          }
         })
         if (cssRecords.length === 0) return null
-        const babelResult = generate(ast, {}, code)
+        const babelResult = generate(
+          ast,
+          {
+            sourceMaps: true,
+            sourceFileName: id
+          },
+          code
+        )
         const cssSource = cssRecords.join(`\n`)
-        const cssFileName = `${fileName}_forest.css`
+        const rand = Math.random().toString(36).slice(2, 8)
+        const cssFileName = `${fileName.replace('/', '_')}_forest.css`
         cssLookup.set(cssFileName, cssSource)
-        return {
-          code: `import '${cssFileName}';\n${babelResult.code}`,
-          map: null,
-        }
+        const cssID = this.emitFile({
+          type: 'asset',
+          name: cssFileName,
+          source: cssSource
+        })
+        return babelResult
       }
       return null
-    },
+    }
   }
 }
 
