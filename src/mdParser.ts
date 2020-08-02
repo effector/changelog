@@ -146,9 +146,7 @@ function createInlineGrammar() {
     .replace('title', raw._title)
     .getRegex()
 
-  const reflink = edit(raw.reflink)
-    .replace('label', raw._label)
-    .getRegex()
+  const reflink = edit(raw.reflink).replace('label', raw._label).getRegex()
 
   const inline = {
     ...raw,
@@ -165,9 +163,7 @@ function createInlineGrammar() {
 
   const inlineGFMRaw = {
     ...inline,
-    escape: edit(inline.escape)
-      .replace('])', '~|])')
-      .getRegex(),
+    escape: edit(inline.escape).replace('])', '~|])').getRegex(),
     _extended_email: /[A-Za-z0-9._+-]+(@)[a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]*[a-zA-Z0-9])+(?![-_])/,
     url: /^((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|^email/,
     _backpedal: /(?:[^?!.,:;*_~()&]+|\([^)]*\)|&(?![a-zA-Z0-9]+;$)|[?!.,:;*_~)]+(?!$))+/,
@@ -185,9 +181,7 @@ function createInlineGrammar() {
   }
   const inlineBreaks = {
     ...inlineGFM,
-    br: edit(inline.br)
-      .replace('{2,}', '*')
-      .getRegex(),
+    br: edit(inline.br).replace('{2,}', '*').getRegex(),
     text: edit(inlineGFM.text)
       .replace('\\b_', '\\b_| {2,}\\n')
       .replace(/\{2,\}/g, '*')
@@ -1075,6 +1069,11 @@ export type AstToken =
   | {type: 'html'; value: string}
   | {type: 'paragraph'; child: AstToken[]}
   | {type: 'space'}
+
+type Filter<T, U> = T extends U ? T : never
+export type ParentAstToken = Filter<AstToken, {child: AstToken[]}>
+export type ContentAstToken = Filter<AstToken, {value: string}>
+
 const ast = {
   link: (href: string, title: string | null, child: AstToken[]): AstToken => ({
     type: 'link',
