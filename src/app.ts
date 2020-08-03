@@ -1,4 +1,4 @@
-import {h, spec, rec, variant, remap, list, block, text} from 'forest'
+import {h, rec, variant, remap, list, block} from 'forest'
 
 import {
   AstToken,
@@ -34,18 +34,9 @@ export const sections = app.createStore<AstToken[][]>([])
 export const versionDates = app.createStore<VersionDate[]>([])
 
 export const setClientState = app.createEvent<any>()
-const clientState = restore(setClientState, {})
+export const clientState = restore(setClientState, {})
 
 const releaseGroups = combine(sections, versionDates, createReleaseGroups)
-
-const ClientScript = block({
-  fn() {
-    const clientStateString = clientState.map(state => JSON.stringify(state))
-    h('script', () => {
-      text`window.__INITIAL_STATE__ = ${clientStateString}`
-    })
-  }
-})
 
 export const Body = block({
   fn() {
@@ -366,19 +357,6 @@ export const Body = block({
     }
   }
 })
-export const App = block({
-  fn() {
-    h('html', () => {
-      h('head', () => {
-        HTMLHead()
-        ClientScript()
-      })
-      h('body', () => {
-        Body()
-      })
-    })
-  }
-})
 
 function createReleaseGroups(
   sections: AstToken[][],
@@ -502,109 +480,6 @@ function createReleaseGroups(
     }
     return -1
   }
-}
-
-function HTMLHead() {
-  h('title', {
-    text: 'Effector changelog'
-  })
-  h('meta', {
-    attr: {charset: 'utf-8'}
-  })
-  Meta('viewport', {
-    content: [
-      'width=device-width',
-      // 'user-scalable=no',
-      'initial-scale=1',
-      // 'maximum-scale=1'
-      'viewport-fit=cover'
-    ].join(', ')
-  })
-  Meta('apple-mobile-web-app-capable', {
-    content: 'yes'
-  })
-  Meta('apple-mobile-web-app-status-bar-style', {
-    content: 'black'
-  })
-  Meta('apple-mobile-web-app-title', {
-    content: 'Effector changelog'
-  })
-  Meta('description', {
-    content: 'Changelog for effector, effector-react and effector-vue releases'
-  })
-  Meta('application-name', {
-    content: 'changelog'
-  })
-  Meta('theme-color', {
-    content: '#120309'
-  })
-  Meta('twitter:card', {
-    content: 'summary'
-  })
-  Meta('og:title', {
-    content: 'Effector changelog',
-    property: true
-  })
-  Meta('og:type', {
-    content: 'website',
-    property: true
-  })
-  Meta('og:url', {
-    content: 'https://changelog.effector.dev',
-    property: true
-  })
-  Meta('og:description', {
-    content: 'Changelog for effector, effector-react and effector-vue releases',
-    property: true
-  })
-  h('link', {
-    attr: {href: 'index.css', rel: 'stylesheet'}
-  })
-  h('link', {
-    attr: {
-      rel: 'apple-touch-icon',
-      sizes: '180x180',
-      href: 'https://editor-prod.effector.dev/apple-touch-icon.png'
-    }
-  })
-  h('link', {
-    attr: {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '32x32',
-      href: 'https://editor-prod.effector.dev/favicon-32x32.png'
-    }
-  })
-  h('link', {
-    attr: {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '16x16',
-      href: 'https://editor-prod.effector.dev/favicon-16x16.png'
-    }
-  })
-  h('link', {
-    attr: {
-      rel: 'shortcut icon',
-      href: 'https://editor-prod.effector.dev/favicon.ico'
-    }
-  })
-}
-
-function Meta(
-  name: string,
-  {content, property = false}: {content; property?: boolean}
-) {
-  h('meta', {
-    attr: {content},
-    fn() {
-      if (property) {
-        spec({attr: {property: name}})
-      } else {
-        spec({attr: {name}})
-      }
-    }
-  })
 }
 
 function formatId(title: string) {

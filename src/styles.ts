@@ -251,7 +251,7 @@ createGlobalStyle`
   font-display: fallback;
   font-style: normal;
   font-named-instance: 'Regular';
-  src: url('assets/Inter-upright.var.woff2') format('woff2');
+  src: url('/assets/Inter-upright.var.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Inter var';
