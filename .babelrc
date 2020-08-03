@@ -17,5 +17,5 @@
       }
     ]
   ],
-  "plugins": []
+  "plugins": ["effector/babel-plugin"]
 }
