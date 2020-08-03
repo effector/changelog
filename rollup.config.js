@@ -4,7 +4,6 @@ import babel from '@rollup/plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import postcss from 'rollup-plugin-postcss'
-import serve from 'rollup-plugin-serve'
 // import livereload from 'rollup-plugin-livereload'
 import run from '@rollup/plugin-run'
 
@@ -12,6 +11,7 @@ import {PROJECT} from './builder/env'
 import {extractCss} from './builder/extractCssPlugin'
 
 const watch = process.env.ROLLUP_WATCH === 'true'
+const prod = process.env.NODE_ENV === 'production'
 
 export default [
   {
@@ -90,9 +90,7 @@ export default [
     ],
     plugins: [
       replace({
-        'process.env.GITHUB_GQL_TOKEN': `"${
-          process.env.GITHUB_GQL_TOKEN || 'no token'
-        }"`
+        'process.env.GITHUB_GQL_TOKEN': `"hidden"`
       }),
       extractCss({project: PROJECT}),
       babel({
@@ -108,7 +106,11 @@ export default [
         extract: true,
         plugins: []
       }),
-      watch && serve('dist/client')
+      prod && import('rollup-plugin-terser').then(({terser}) => terser()),
+      watch &&
+        import('rollup-plugin-serve').then(({default: serve}) =>
+          serve('dist/client')
+        )
       // watch && livereload()
     ]
   }
