@@ -4,9 +4,14 @@ import babel from '@rollup/plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import postcss from 'rollup-plugin-postcss'
+import serve from 'rollup-plugin-serve'
+// import livereload from 'rollup-plugin-livereload'
+import run from '@rollup/plugin-run'
 
 import {ENTRY, PROJECT} from './builder/env'
 import {extractCss} from './builder/extractCssPlugin'
+
+const watch = process.env.ROLLUP_WATCH === 'true'
 
 export default {
   input: ENTRY,
@@ -51,6 +56,9 @@ export default {
     postcss({
       extract: true,
       plugins: []
-    })
+    }),
+    watch && serve('dist'),
+    run()
+    // watch && livereload()
   ]
 }
