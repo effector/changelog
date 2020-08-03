@@ -1,4 +1,4 @@
-import {h, spec, rec, variant, remap, list, block} from 'forest'
+import {h, spec, rec, variant, remap, list, block, text} from 'forest'
 
 import {
   AstToken,
@@ -11,7 +11,7 @@ import {MANY_LINES, LARGE_ARTICLE} from './env'
 import {VersionDate} from './index.h'
 
 import {styles} from './styles'
-import {Store, createDomain, combine} from 'effector'
+import {Store, createDomain, combine, restore} from 'effector'
 
 type ReleaseNote = {
   version: string
@@ -33,9 +33,21 @@ export const app = createDomain()
 export const sections = app.createStore<AstToken[][]>([])
 export const versionDates = app.createStore<VersionDate[]>([])
 
+export const setClientState = app.createEvent<any>()
+const clientState = restore(setClientState, {})
+
 const releaseGroups = combine(sections, versionDates, createReleaseGroups)
 
-export const App = block({
+const ClientScript = block({
+  fn() {
+    const clientStateString = clientState.map(state => JSON.stringify(state))
+    h('script', () => {
+      text`window.__INITIAL_STATE__ = ${clientStateString}`
+    })
+  }
+})
+
+export const Body = block({
   fn() {
     function ChildToken<T extends ParentAstToken>(parent: Store<T>) {
       const childs = remap(parent, 'child')
@@ -221,58 +233,46 @@ export const App = block({
         }
       })
     })
-
-    h('html', () => {
-      h('head', () => {
-        HTMLHead()
-      })
-      h('body', () => {
-        Body()
-      })
+    h('div', {
+      attr: {'aria-hidden': 'true'},
+      text: '.',
+      fn: styles.topFiller
     })
-
-    function Body() {
-      h('div', {
-        attr: {'aria-hidden': 'true'},
-        text: '.',
-        fn: styles.topFiller
-      })
-      h('section', {
-        data: {appSection: 'docs'},
-        fn() {
-          styles.releaseList()
-          h('header', () => {
-            h('h1', {
-              data: {headLink: 1},
-              text: 'Changelog'
-            })
+    h('section', {
+      data: {appSection: 'docs'},
+      fn() {
+        styles.releaseList()
+        h('header', () => {
+          h('h1', {
+            data: {headLink: 1},
+            text: 'Changelog'
           })
-          h('nav', {
-            fn() {
-              styles.navigation()
-              list({
-                source: releaseGroups,
-                key: 'groupID',
-                fn({store, key: groupID}) {
-                  const href = groupID.map(groupID => `#${groupID}`)
-                  h('a', {
-                    attr: {href},
-                    text: remap(store, 'library')
-                  })
-                }
-              })
-            }
-          })
-          list({
-            source: releaseGroups,
-            key: 'groupID',
-            fn({store}) {
-              ReleaseGroup(store)
-            }
-          })
-        }
-      })
-    }
+        })
+        h('nav', {
+          fn() {
+            styles.navigation()
+            // list({
+            //   source: releaseGroups,
+            //   key: 'groupID',
+            //   fn({store, key: groupID}) {
+            //     const href = groupID.map(groupID => `#${groupID}`)
+            //     h('a', {
+            //       attr: {href},
+            //       text: remap(store, 'library')
+            //     })
+            //   }
+            // })
+          }
+        })
+        // list({
+        //   source: releaseGroups,
+        //   key: 'groupID',
+        //   fn({store}) {
+        //     ReleaseGroup(store)
+        //   }
+        // })
+      }
+    })
     function ReleaseGroup(releaseGroup: Store<ReleaseGroup>) {
       const [library, groupID, releases] = remap(releaseGroup, [
         'library',
@@ -364,6 +364,19 @@ export const App = block({
         fn: styles.anchor
       })
     }
+  }
+})
+export const App = block({
+  fn() {
+    h('html', () => {
+      h('head', () => {
+        HTMLHead()
+        ClientScript()
+      })
+      h('body', () => {
+        Body()
+      })
+    })
   }
 })
 

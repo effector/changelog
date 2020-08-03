@@ -1,10 +1,10 @@
 import {resolve} from 'path'
 //@ts-ignore
 import {outputFile, copy} from 'fs-extra'
-import {fork} from 'effector'
+import {fork, serialize, allSettled} from 'effector'
 import {renderStatic} from 'forest/server'
 
-import {App, app, sections, versionDates} from './app'
+import {App, app, sections, versionDates, setClientState} from './app'
 import {format} from 'prettier'
 import {fetchData} from './fetchData'
 
@@ -15,6 +15,14 @@ async function generateStatic() {
     values: new Map()
       .set(sections, data.sections)
       .set(versionDates, data.versionDates)
+  })
+
+  const serialized = serialize(scope, {
+    onlyChanges: true
+  })
+  await allSettled(setClientState, {
+    params: serialized,
+    scope
   })
 
   const renderedRaw = await renderStatic({
