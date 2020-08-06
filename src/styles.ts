@@ -259,7 +259,7 @@ createGlobalStyle`
   font-display: fallback;
   font-style: italic;
   font-named-instance: 'Italic';
-  src: url('assets/Inter-italic.var.woff2') format('woff2');
+  src: url('/assets/Inter-italic.var.woff2') format('woff2');
 }
 body {
   font-family: 'Inter var', sans-serif;

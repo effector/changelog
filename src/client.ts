@@ -8,6 +8,6 @@ const scope = fork(app, {
 
 using(document.body, {
   scope,
-  fn: Body,
-  hydrate: true
+  fn: Body
+  // hydrate: true
 })

@@ -38,192 +38,188 @@ export const clientState = restore(setClientState, {})
 
 const releaseGroups = combine(sections, versionDates, createReleaseGroups)
 
-export const Body = block({
-  fn() {
-    function ChildToken<T extends ParentAstToken>(parent: Store<T>) {
-      const childs = remap(parent, 'child')
-      list(childs, ({store}) => {
-        Token({state: store})
-      })
+function ChildToken<T extends ParentAstToken>(parent: Store<T>) {
+  const childs = remap(parent, 'child')
+  list({
+    source: childs,
+    key: 'id',
+    fn({store}) {
+      Token({state: store})
     }
-    function ContentToken<T extends ContentAstToken>({
-      store
-    }: {
-      store: Store<T>
-    }) {
-      h('span', {
-        text: remap(store, 'value')
-      })
-    }
+  })
+}
+function ContentToken<T extends ContentAstToken>({store}: {store: Store<T>}) {
+  h('span', {
+    text: remap(store, 'value')
+  })
+}
 
-    const Token = rec<AstToken>(({state: store}) => {
-      variant({
-        source: store,
-        key: 'type',
-        cases: {
-          strong({store}) {
-            h('strong', () => {
-              ChildToken(store)
-            })
-          },
-          em({store}) {
-            h('em', () => {
-              ChildToken(store)
-            })
-          },
-          del({store}) {
-            h('del', () => {
-              ChildToken(store)
-            })
-          },
-          blockquote({store}) {
-            h('blockquote', () => {
-              ChildToken(store)
-            })
-          },
-          br: () => h('br', {}),
-          hr: () => h('hr', {}),
-          codespan({store}) {
-            h('code', {
-              text: remap(store, 'value')
-            })
-          },
-          paragraph({store}) {
-            h('p', {
-              data: {mdElement: 'paragraph'},
-              fn() {
-                ChildToken(store)
-              }
-            })
-          },
-          space: () => h('span', {text: ' '}),
-          text: ContentToken,
-          escape: ContentToken,
-          tag: ContentToken,
-          html: ContentToken,
-          heading({store: value}) {
-            const Heading = (level: number) => ({
-              store
-            }: {
-              store: typeof value
-            }) => {
-              //@ts-ignore
-              h(`h${level}`, {
-                data: {headLink: level},
+const Token = rec<AstToken>(({state: store}) => {
+  variant({
+    source: store,
+    key: 'type',
+    cases: {
+      strong({store}) {
+        h('strong', () => {
+          ChildToken(store)
+        })
+      },
+      em({store}) {
+        h('em', () => {
+          ChildToken(store)
+        })
+      },
+      del({store}) {
+        h('del', () => {
+          ChildToken(store)
+        })
+      },
+      blockquote({store}) {
+        h('blockquote', () => {
+          ChildToken(store)
+        })
+      },
+      br: () => h('br', {}),
+      hr: () => h('hr', {}),
+      codespan({store}) {
+        h('code', {
+          text: remap(store, 'value')
+        })
+      },
+      paragraph({store}) {
+        h('p', {
+          data: {mdElement: 'paragraph'},
+          fn() {
+            ChildToken(store)
+          }
+        })
+      },
+      space: () => h('span', {text: ' '}),
+      text: ContentToken,
+      escape: ContentToken,
+      tag: ContentToken,
+      html: ContentToken,
+      heading({store: value}) {
+        const Heading = (level: number) => ({store}: {store: typeof value}) => {
+          //@ts-ignore
+          h(`h${level}`, {
+            data: {headLink: level},
+            fn() {
+              const id = store.map(({child}) => {
+                const id = formatId(extractText(child).join(''))
+                return `#${id}`
+              })
+
+              h('a', {
+                attr: {href: id},
                 fn() {
-                  const id = store.map(({child}) => {
-                    const id = formatId(extractText(child).join(''))
-                    return `#${id}`
-                  })
-
-                  h('a', {
-                    attr: {href: id},
-                    fn() {
-                      ChildToken(store)
-                    }
-                  })
+                  ChildToken(store)
                 }
               })
             }
-            variant({
-              source: value,
-              key: 'level',
-              cases: {
-                1: Heading(1),
-                2: Heading(2),
-                3: Heading(3),
-                4: Heading(4),
-                5: Heading(5),
-                6: Heading(6),
-                __: Heading(6)
-              }
-            })
-          },
-          link({store}) {
-            const [hrefRaw, title] = remap(store, ['href', 'title'] as const)
-            title.watch(title => {
-              if (title != null) console.error('title is not supported')
-            })
-            const href = hrefRaw.map(href => {
-              if (href.endsWith('.md')) href = `#${href.replace('.md', '')}`
-              else if (href.endsWith('.MD'))
-                href = `#${href.replace('.MD', '')}`
-              else if (/\.md\#/.test(href)) {
-                href = href.replace(/\.md\#/, '#')
-              } else if (/\.MD\#/.test(href)) {
-                href = href.replace(/\.MD\#/, '#')
-              }
-              return href
-            })
-            h('a', {
-              attr: {href},
-              fn() {
-                ChildToken(store)
-              }
-            })
-          },
-          code({store}) {
-            h('pre', {
-              data: {element: 'code'},
-              fn() {
-                h('code', {
-                  text: remap(store, 'value')
-                })
-              }
-            })
-          },
-          list({store}) {
-            variant({
-              source: store,
-              key: 'ordered',
-              cases: {
-                true({store}) {
-                  h('ol', {
-                    data: {mdElement: 'list'},
-                    fn() {
-                      ChildToken(store)
-                    }
-                  })
-                },
-                __({store}) {
-                  h('ul', {
-                    data: {mdElement: 'list'},
-                    fn() {
-                      ChildToken(store)
-                    }
-                  })
-                }
-              }
-            })
-          },
-          listitem({store}) {
-            store.watch(({task, checked}) => {
-              if (task || checked !== undefined) {
-                console.error('not supported')
-              }
-            })
-            h('li', () => {
-              ChildToken(store)
-            })
-          },
-          checkbox({store}) {
-            h('input', {
-              attr: {
-                type: 'checkbox',
-                checked: remap(store, 'checked')
-              }
-            })
-          },
-          image({store}) {
-            h('img', {
-              attr: {
-                src: remap(store, 'href')
-              }
+          })
+        }
+        variant({
+          source: value,
+          key: 'level',
+          cases: {
+            1: Heading(1),
+            2: Heading(2),
+            3: Heading(3),
+            4: Heading(4),
+            5: Heading(5),
+            6: Heading(6),
+            __: Heading(6)
+          }
+        })
+      },
+      link({store}) {
+        const [hrefRaw, title] = remap(store, ['href', 'title'] as const)
+        title.watch(title => {
+          if (title != null) console.error('title is not supported')
+        })
+        const href = hrefRaw.map(href => {
+          if (href.endsWith('.md')) href = `#${href.replace('.md', '')}`
+          else if (href.endsWith('.MD')) href = `#${href.replace('.MD', '')}`
+          else if (/\.md\#/.test(href)) {
+            href = href.replace(/\.md\#/, '#')
+          } else if (/\.MD\#/.test(href)) {
+            href = href.replace(/\.MD\#/, '#')
+          }
+          return href
+        })
+        h('a', {
+          attr: {href},
+          fn() {
+            ChildToken(store)
+          }
+        })
+      },
+      code({store}) {
+        h('pre', {
+          data: {element: 'code'},
+          fn() {
+            h('code', {
+              text: remap(store, 'value')
             })
           }
-        }
-      })
-    })
+        })
+      },
+      list({store}) {
+        variant({
+          source: store,
+          key: 'ordered',
+          cases: {
+            true({store}) {
+              h('ol', {
+                data: {mdElement: 'list'},
+                fn() {
+                  ChildToken(store)
+                }
+              })
+            },
+            __({store}) {
+              h('ul', {
+                data: {mdElement: 'list'},
+                fn() {
+                  ChildToken(store)
+                }
+              })
+            }
+          }
+        })
+      },
+      listitem({store}) {
+        store.watch(({task, checked}) => {
+          if (task || checked !== undefined) {
+            console.error('not supported')
+          }
+        })
+        h('li', () => {
+          ChildToken(store)
+        })
+      },
+      checkbox({store}) {
+        h('input', {
+          attr: {
+            type: 'checkbox',
+            checked: remap(store, 'checked')
+          }
+        })
+      },
+      image({store}) {
+        h('img', {
+          attr: {
+            src: remap(store, 'href')
+          }
+        })
+      }
+    }
+  })
+})
+
+export const Body = block({
+  fn() {
     h('div', {
       attr: {'aria-hidden': 'true'},
       text: '.',
@@ -242,26 +238,26 @@ export const Body = block({
         h('nav', {
           fn() {
             styles.navigation()
-            // list({
-            //   source: releaseGroups,
-            //   key: 'groupID',
-            //   fn({store, key: groupID}) {
-            //     const href = groupID.map(groupID => `#${groupID}`)
-            //     h('a', {
-            //       attr: {href},
-            //       text: remap(store, 'library')
-            //     })
-            //   }
-            // })
+            list({
+              source: releaseGroups,
+              key: 'groupID',
+              fn({store, key: groupID}) {
+                const href = groupID.map(groupID => `#${groupID}`)
+                h('a', {
+                  attr: {href},
+                  text: remap(store, 'library')
+                })
+              }
+            })
           }
         })
-        // list({
-        //   source: releaseGroups,
-        //   key: 'groupID',
-        //   fn({store}) {
-        //     ReleaseGroup(store)
-        //   }
-        // })
+        list({
+          source: releaseGroups,
+          key: 'groupID',
+          fn({store}) {
+            ReleaseGroup(store)
+          }
+        })
       }
     })
     function ReleaseGroup(releaseGroup: Store<ReleaseGroup>) {
@@ -334,8 +330,12 @@ export const Body = block({
                       text: dateString
                     })
                   })
-                  list(content, ({store}) => {
-                    Token({state: store})
+                  list({
+                    source: content,
+                    key: 'id',
+                    fn({store}) {
+                      Token({state: store})
+                    }
                   })
                 }
               })

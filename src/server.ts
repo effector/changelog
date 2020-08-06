@@ -6,7 +6,7 @@ import {h, text, block, spec} from 'forest'
 import {renderStatic} from 'forest/server'
 
 import {
-  Body,
+  // Body,
   app,
   sections,
   versionDates,
@@ -40,13 +40,14 @@ const App = block({
         })
       })
       h('body', () => {
-        Body()
+        // Body()
       })
     })
   }
 })
 
 async function generateStatic() {
+  console.log('start')
   const data = await fetchData()
 
   const scope = fork(app, {
@@ -63,6 +64,8 @@ async function generateStatic() {
     scope
   })
 
+  console.log('render')
+
   const renderedRaw = await renderStatic({
     scope,
     fn: App
@@ -70,6 +73,7 @@ async function generateStatic() {
 
   const rendered = format(renderedRaw, {parser: 'html', printWidth: 60})
 
+  console.log('output')
   await Promise.all([
     outputFile(resolve(__dirname, 'client', 'index.html'), rendered),
     copy(
@@ -77,6 +81,7 @@ async function generateStatic() {
       resolve(__dirname, 'client', 'assets')
     )
   ])
+  console.log('end')
 }
 
 generateStatic()
