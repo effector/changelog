@@ -205,69 +205,80 @@ const gfmGrammarRules = {
 const {inline, inlineGFM} = createInlineGrammar()
 
 export type Token =
-  | {type: 'space'}
+  | {type: 'space'; id: number}
   | {
       type: 'code'
       codeBlockStyle: 'indented'
       text: string
+      id: number
     }
   | {
       type: 'code'
       lang: string
       text: string
+      id: number
     }
   | {
       type: 'heading'
       depth: number
       text: string
+      id: number
     }
   | {
       type: 'table'
       header: string[]
       align: Array<'left' | 'right' | 'center' | null>
       cells: string[][]
+      id: number
     }
-  | {type: 'hr'}
-  | {type: 'blockquote_start'}
-  | {type: 'blockquote_end'}
+  | {type: 'hr'; id: number}
+  | {type: 'blockquote_start'; id: number}
+  | {type: 'blockquote_end'; id: number}
   | {
       type: 'list_start'
       ordered: true
       start: number
       loose: boolean
+      id: number
     }
   | {
       type: 'list_start'
       ordered: false
       start: string
       loose: boolean
+      id: number
     }
   | {
       type: 'list_item_start'
       task: false
       checked: undefined
       loose: boolean
+      id: number
     }
   | {
       type: 'list_item_start'
       task: true
       checked: boolean
       loose: boolean
+      id: number
     }
-  | {type: 'list_item_end'}
-  | {type: 'list_end'}
+  | {type: 'list_item_end'; id: number}
+  | {type: 'list_end'; id: number}
   | {
       type: 'html'
       pre: boolean
       text: string
+      id: number
     }
   | {
       type: 'paragraph'
       text: string
+      id: number
     }
   | {
       type: 'text'
       text: string
+      id: number
     }
 
 type LinkToken = {
@@ -283,6 +294,7 @@ export function parseToAST(
   src: string,
   {smartLists = false}: {smartLists?: boolean} = {}
 ) {
+  let nextTokenID = 0
   const tokens: Token[] = []
   const links = new Map<string, LinkToken>()
   const rules = gfmGrammarRules
@@ -355,7 +367,8 @@ export function parseToAST(
         src = src.substring(cap[0].length)
         if (cap[0].length > 1) {
           tokens.push({
-            type: 'space'
+            type: 'space',
+            id: ++nextTokenID
           })
         }
       }
@@ -372,7 +385,8 @@ export function parseToAST(
           tokens.push({
             type: 'code',
             codeBlockStyle: 'indented',
-            text: rtrim(cap, '\n')
+            text: rtrim(cap, '\n'),
+            id: ++nextTokenID
           })
         }
         continue
@@ -384,7 +398,8 @@ export function parseToAST(
         tokens.push({
           type: 'code',
           lang: cap[2] ? cap[2].trim() : cap[2],
-          text: cap[3] || ''
+          text: cap[3] || '',
+          id: ++nextTokenID
         })
         continue
       }
@@ -395,7 +410,8 @@ export function parseToAST(
         tokens.push({
           type: 'heading',
           depth: cap[1].length,
-          text: cap[2]
+          text: cap[2],
+          id: ++nextTokenID
         })
         continue
       }
@@ -406,7 +422,8 @@ export function parseToAST(
           type: 'table',
           header: splitCells(cap[1].replace(/^ *| *\| *$/g, '')),
           align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
-          cells: cap[3] ? cap[3].replace(/\n$/, '').split('\n') : []
+          cells: cap[3] ? cap[3].replace(/\n$/, '').split('\n') : [],
+          id: ++nextTokenID
         }
 
         if (item.header.length === item.align.length) {
@@ -438,7 +455,8 @@ export function parseToAST(
       if ((cap = rules.hr.exec(src))) {
         src = src.substring(cap[0].length)
         tokens.push({
-          type: 'hr'
+          type: 'hr',
+          id: ++nextTokenID
         })
         continue
       }
@@ -448,7 +466,8 @@ export function parseToAST(
         src = src.substring(cap[0].length)
 
         tokens.push({
-          type: 'blockquote_start'
+          type: 'blockquote_start',
+          id: ++nextTokenID
         })
 
         cap = cap[0].replace(/^ *> ?/gm, '')
@@ -459,7 +478,8 @@ export function parseToAST(
         lexerToken(cap, top)
 
         tokens.push({
-          type: 'blockquote_end'
+          type: 'blockquote_end',
+          id: ++nextTokenID
         })
 
         continue
@@ -475,7 +495,8 @@ export function parseToAST(
           type: 'list_start',
           ordered: isordered,
           start: isordered ? +bull : '',
-          loose: false
+          loose: false,
+          id: ++nextTokenID
         }
 
         tokens.push(listStart)
@@ -542,7 +563,8 @@ export function parseToAST(
             type: 'list_item_start',
             task: istask,
             checked: ischecked,
-            loose
+            loose,
+            id: ++nextTokenID
           }
 
           listItems.push(t)
@@ -552,7 +574,8 @@ export function parseToAST(
           lexerToken(item, false)
 
           tokens.push({
-            type: 'list_item_end'
+            type: 'list_item_end',
+            id: ++nextTokenID
           })
         }
 
@@ -565,7 +588,8 @@ export function parseToAST(
         }
 
         tokens.push({
-          type: 'list_end'
+          type: 'list_end',
+          id: ++nextTokenID
         })
 
         continue
@@ -577,7 +601,8 @@ export function parseToAST(
         tokens.push({
           type: 'html',
           pre: cap[1] === 'pre' || cap[1] === 'script' || cap[1] === 'style',
-          text: cap[0]
+          text: cap[0],
+          id: ++nextTokenID
         })
         continue
       }
@@ -602,7 +627,8 @@ export function parseToAST(
           type: 'table',
           header: splitCells(cap[1].replace(/^ *| *\| *$/g, '')),
           align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
-          cells: cap[3] ? cap[3].replace(/\n$/, '').split('\n') : []
+          cells: cap[3] ? cap[3].replace(/\n$/, '').split('\n') : [],
+          id: ++nextTokenID
         }
 
         if (item.header.length === item.align.length) {
@@ -639,7 +665,8 @@ export function parseToAST(
         tokens.push({
           type: 'heading',
           depth: cap[2].charAt(0) === '=' ? 1 : 2,
-          text: cap[1]
+          text: cap[1],
+          id: ++nextTokenID
         })
         continue
       }
@@ -652,7 +679,8 @@ export function parseToAST(
           text:
             cap[1].charAt(cap[1].length - 1) === '\n'
               ? cap[1].slice(0, -1)
-              : cap[1]
+              : cap[1],
+          id: ++nextTokenID
         })
         continue
       }
@@ -663,7 +691,8 @@ export function parseToAST(
         src = src.substring(cap[0].length)
         tokens.push({
           type: 'text',
-          text: cap[0]
+          text: cap[0],
+          id: ++nextTokenID
         })
         continue
       }
@@ -1040,72 +1069,125 @@ export function extractText(
 }
 
 export type AstToken =
-  | {type: 'link'; href: string; title: string | null; child: AstToken[]}
-  | {type: 'image'; href; title; value: string}
-  | {type: 'strong'; child: AstToken[]}
-  | {type: 'em'; child: AstToken[]}
-  | {type: 'codespan'; value: string}
-  | {type: 'br'}
-  | {type: 'del'; child: AstToken[]}
-  | {type: 'text'; value: string}
-  | {type: 'escape'; value: string}
-  | {type: 'tag'; value: string}
-  | {type: 'hr'}
-  | {type: 'heading'; child: AstToken[]; level: number}
-  | {type: 'code'; value: string; lang: string | void; escaped: boolean | void}
+  | {
+      type: 'link'
+      href: string
+      title: string | null
+      child: AstToken[]
+      id: number
+    }
+  | {type: 'image'; href; title; value: string; id: number}
+  | {type: 'strong'; child: AstToken[]; id: number}
+  | {type: 'em'; child: AstToken[]; id: number}
+  | {type: 'codespan'; value: string; id: number}
+  | {type: 'br'; id: number}
+  | {type: 'del'; child: AstToken[]; id: number}
+  | {type: 'text'; value: string; id: number}
+  | {type: 'escape'; value: string; id: number}
+  | {type: 'tag'; value: string; id: number}
+  | {type: 'hr'; id: number}
+  | {type: 'heading'; child: AstToken[]; level: number; id: number}
+  | {
+      type: 'code'
+      value: string
+      lang: string | void
+      escaped: boolean | void
+      id: number
+    }
   | {
       type: 'tablecell'
       child: AstToken[]
       header: boolean
       align: 'left' | 'right' | 'center'
+      id: number
     }
-  | {type: 'tablerow'; child: AstToken[]}
-  | {type: 'table'; child: AstToken[]; header: AstToken[]}
-  | {type: 'blockquote'; child: AstToken[]}
-  | {type: 'list'; child: AstToken[]; ordered: true; start: number}
-  | {type: 'list'; child: AstToken[]; ordered: false; start: string}
-  | {type: 'checkbox'; checked: boolean}
-  | {type: 'listitem'; child: AstToken[]; task; checked: boolean | void}
-  | {type: 'html'; value: string}
-  | {type: 'paragraph'; child: AstToken[]}
-  | {type: 'space'}
+  | {type: 'tablerow'; child: AstToken[]; id: number}
+  | {type: 'table'; child: AstToken[]; header: AstToken[]; id: number}
+  | {type: 'blockquote'; child: AstToken[]; id: number}
+  | {type: 'list'; child: AstToken[]; ordered: true; start: number; id: number}
+  | {type: 'list'; child: AstToken[]; ordered: false; start: string; id: number}
+  | {type: 'checkbox'; checked: boolean; id: number}
+  | {
+      type: 'listitem'
+      child: AstToken[]
+      task
+      checked: boolean | void
+      id: number
+    }
+  | {type: 'html'; value: string; id: number}
+  | {type: 'paragraph'; child: AstToken[]; id: number}
+  | {type: 'space'; id: number}
 
 type Filter<T, U> = T extends U ? T : never
 export type ParentAstToken = Filter<AstToken, {child: AstToken[]}>
 export type ContentAstToken = Filter<AstToken, {value: string}>
+
+let nextAstTokenID = 0
 
 const ast = {
   link: (href: string, title: string | null, child: AstToken[]): AstToken => ({
     type: 'link',
     href,
     title,
-    child
+    child,
+    id: ++nextAstTokenID
   }),
   image: (href, title, value: string): AstToken => ({
     type: 'image',
     href,
     title,
-    value
+    value,
+    id: ++nextAstTokenID
   }),
-  strong: (child: AstToken[]): AstToken => ({type: 'strong', child}),
-  em: (child: AstToken[]): AstToken => ({type: 'em', child}),
-  codespan: (value: string): AstToken => ({type: 'codespan', value}),
-  br: (): AstToken => ({type: 'br'}),
-  del: (child: AstToken[]): AstToken => ({type: 'del', child}),
-  text: (value: string): AstToken => ({type: 'text', value}),
-  escape: (value: string): AstToken => ({type: 'escape', value}),
-  tag: (value: string): AstToken => ({type: 'tag', value}),
-  hr: (): AstToken => ({type: 'hr'}),
+  strong: (child: AstToken[]): AstToken => ({
+    type: 'strong',
+    child,
+    id: ++nextAstTokenID
+  }),
+  em: (child: AstToken[]): AstToken => ({
+    type: 'em',
+    child,
+    id: ++nextAstTokenID
+  }),
+  codespan: (value: string): AstToken => ({
+    type: 'codespan',
+    value,
+    id: ++nextAstTokenID
+  }),
+  br: (): AstToken => ({type: 'br', id: ++nextAstTokenID}),
+  del: (child: AstToken[]): AstToken => ({
+    type: 'del',
+    child,
+    id: ++nextAstTokenID
+  }),
+  text: (value: string): AstToken => ({
+    type: 'text',
+    value,
+    id: ++nextAstTokenID
+  }),
+  escape: (value: string): AstToken => ({
+    type: 'escape',
+    value,
+    id: ++nextAstTokenID
+  }),
+  tag: (value: string): AstToken => ({
+    type: 'tag',
+    value,
+    id: ++nextAstTokenID
+  }),
+  hr: (): AstToken => ({type: 'hr', id: ++nextAstTokenID}),
   heading: (child: AstToken[], level: number): AstToken => ({
     type: 'heading',
     child,
-    level
+    level,
+    id: ++nextAstTokenID
   }),
   code: (value: string, lang: string | void, escaped): AstToken => ({
     type: 'code',
     value,
     lang,
-    escaped
+    escaped,
+    id: ++nextAstTokenID
   }),
   tablecell: (
     child: AstToken[],
@@ -1114,15 +1196,25 @@ const ast = {
     type: 'tablecell',
     child,
     header,
-    align
+    align,
+    id: ++nextAstTokenID
   }),
-  tablerow: (child: AstToken[]): AstToken => ({type: 'tablerow', child}),
+  tablerow: (child: AstToken[]): AstToken => ({
+    type: 'tablerow',
+    child,
+    id: ++nextAstTokenID
+  }),
   table: (header: AstToken[], child: AstToken[]): AstToken => ({
     type: 'table',
     header,
-    child
+    child,
+    id: ++nextAstTokenID
   }),
-  blockquote: (child: AstToken[]): AstToken => ({type: 'blockquote', child}),
+  blockquote: (child: AstToken[]): AstToken => ({
+    type: 'blockquote',
+    child,
+    id: ++nextAstTokenID
+  }),
   list: (
     child: AstToken[],
     ordered: boolean,
@@ -1132,18 +1224,32 @@ const ast = {
     type: 'list',
     child,
     ordered,
-    start
+    start,
+    id: ++nextAstTokenID
   }),
-  checkbox: (checked: boolean): AstToken => ({type: 'checkbox', checked}),
+  checkbox: (checked: boolean): AstToken => ({
+    type: 'checkbox',
+    checked,
+    id: ++nextAstTokenID
+  }),
   listitem: (child: AstToken[], task, checked?: boolean): AstToken => ({
     type: 'listitem',
     child,
     task,
-    checked
+    checked,
+    id: ++nextAstTokenID
   }),
-  html: (value: string): AstToken => ({type: 'html', value}),
-  paragraph: (child: AstToken[]): AstToken => ({type: 'paragraph', child}),
-  space: (): AstToken => ({type: 'space'})
+  html: (value: string): AstToken => ({
+    type: 'html',
+    value,
+    id: ++nextAstTokenID
+  }),
+  paragraph: (child: AstToken[]): AstToken => ({
+    type: 'paragraph',
+    child,
+    id: ++nextAstTokenID
+  }),
+  space: (): AstToken => ({type: 'space', id: ++nextAstTokenID})
 }
 
 function inlineLexerEscapes(text) {
