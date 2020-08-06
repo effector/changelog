@@ -11,8 +11,8 @@
   "dependencies": {
     "cross-fetch": "^3.0.5",
     "dotenv": "^8.2.0",
-    "effector": "^21.2.0",
-    "forest": "^0.18.3",
+    "effector": "^21.2.1",
+    "forest": "^0.18.4",
     "fs-extra": "^9.0.1"
   },
   "devDependencies": {
