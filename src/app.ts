@@ -301,13 +301,12 @@ export const Body = block({
                 'releaseID',
                 'date'
               ] as const)
-              const dateString = date.map(date =>
-                new Date(date).toLocaleDateString(['en-US'], {
-	                year: 'numeric',
-	                month: 'long',
-	                day: 'numeric'
-	              })
-              )
+              const formatter = new Intl.DateTimeFormat(['en-US'], {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })
+              const dateString = date.map(date => formatter.format(date))
               const dateISO = date.map(date => new Date(date).toISOString())
               const href = releaseID.map(releaseID => `#${releaseID}`)
               HiddenLink(releaseID)
