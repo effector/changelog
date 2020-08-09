@@ -303,10 +303,10 @@ export const Body = block({
               ] as const)
               const dateString = date.map(date =>
                 new Date(date).toLocaleDateString(['en-US'], {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })
+	                year: 'numeric',
+	                month: 'long',
+	                day: 'numeric'
+	              })
               )
               const dateISO = date.map(date => new Date(date).toISOString())
               const href = releaseID.map(releaseID => `#${releaseID}`)
@@ -402,7 +402,7 @@ function createReleaseGroups(
       })
     } else {
       if (effectorMentioned) {
-        const versionMatcher = /(?<=effector[^-]).*?(\d+\.\d+\.\d+(-\d+\.\d+\.\d+)?)/gm
+        const versionMatcher = /(?:effector[^-]).*?(\d+\.\d+\.\d+(-\d+\.\d+\.\d+)?)/gm
         const [, version] = versionMatcher.exec(titleText)!
         releaseNotes.effector.push({
           version,
@@ -415,7 +415,7 @@ function createReleaseGroups(
         })
       }
       if (effReactMentioned) {
-        const versionMatcher = /(?<=effector-react).*?(\d+\.\d+\.\d+)/gm
+        const versionMatcher = /(?:effector-react).*?(\d+\.\d+\.\d+)/gm
         const [, version] = versionMatcher.exec(titleText)!
         releaseNotes.effectorReact.push({
           version,
@@ -428,7 +428,7 @@ function createReleaseGroups(
         })
       }
       if (effVueMentioned) {
-        const versionMatcher = /(?<=effector-vue).*?(\d+\.\d+\.\d+)/gm
+        const versionMatcher = /(?:effector-vue).*?(\d+\.\d+\.\d+)/gm
         const [, version] = versionMatcher.exec(titleText)!
         releaseNotes.effectorVue.push({
           version,
