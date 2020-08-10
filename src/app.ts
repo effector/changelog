@@ -44,7 +44,7 @@ function ChildToken<T extends ParentAstToken>(parent: Store<T>) {
     source: childs,
     key: 'id',
     fn({store}) {
-      Token({state: store})
+      Token({store})
     }
   })
 }
@@ -54,7 +54,7 @@ function ContentToken<T extends ContentAstToken>({store}: {store: Store<T>}) {
   })
 }
 
-const Token = rec<AstToken>(({state: store}) => {
+const Token = rec<AstToken>(({store}) => {
   variant({
     source: store,
     key: 'type',
@@ -333,7 +333,7 @@ export const Body = block({
                     source: content,
                     key: 'id',
                     fn({store}) {
-                      Token({state: store})
+                      Token({store})
                     }
                   })
                 }
