@@ -867,6 +867,13 @@
     node-gyp "^6.1.0"
     read-package-json-fast "^1.1.3"
 
+"@rollup/plugin-alias@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-alias/-/plugin-alias-3.1.1.tgz#bb96cf37fefeb0a953a6566c284855c7d1cd290c"
+  integrity sha512-hNcQY4bpBUIvxekd26DBPgF7BT4mKVNDF5tBG4Zi+3IgwLxGYRY0itHs9D0oLVwXM5pvJDWJlBQro+au8WaUWw==
+  dependencies:
+    slash "^3.0.0"
+
 "@rollup/plugin-babel@^5.0.4":
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-babel/-/plugin-babel-5.0.4.tgz#dbfcf86a0561e399579ceb1a534a83c970e76645"
@@ -1674,10 +1681,10 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
 
-effector@^21.2.1:
-  version "21.2.1"
-  resolved "https://registry.yarnpkg.com/effector/-/effector-21.2.1.tgz#89313771684b9e37e1c2da90d7f017c3b5f73388"
-  integrity sha512-1GzkdnhJkDBegiGEMW8F/4cGCjSp2GA4UHFpdt94hFOZDrYbvVnIjH2jpGze6/MVwNMUG3sQL4XF08gcU7MQ1w==
+effector@^21.2.2:
+  version "21.2.2"
+  resolved "https://registry.yarnpkg.com/effector/-/effector-21.2.2.tgz#5b752c1c3cd7698ab5725f443de6e440d2e87e83"
+  integrity sha512-Ndn7Uth1Bu5zLrkBG+kdaWpVwmtOvvdz9kznLs1iHGhsEds7UAUsuTmU0RvIunXiyB6gMtTYuqnhRnZwlygMqw==
 
 electron-to-chromium@^1.3.483:
   version "1.3.483"
@@ -1816,10 +1823,10 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
-forest@^0.18.4:
-  version "0.18.4"
-  resolved "https://registry.yarnpkg.com/forest/-/forest-0.18.4.tgz#13d05113a28e5636e8ac497f5d81fb6222d992d0"
-  integrity sha512-10BdRQDICIEOmnG5sTc4m6GYlbDillQCN1yf9eO1XzpBwnV/NFCiWqjtnaFvnrSwP5FZfT6njXnrbznYdkZYAQ==
+forest@^0.19.1:
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/forest/-/forest-0.19.1.tgz#0b08b2c77955a7af449664f61207acc4aad97435"
+  integrity sha512-dWB9JVRnvT7DbRt3e8+eopQUNLh5NgPbC/6AE4LIwJdlhoY1ygbKq1pCjg9CgL/8ifpEC1nEVdPCGGri2fij1A==
 
 forever-agent@~0.6.1:
   version "0.6.1"
@@ -3612,6 +3619,11 @@ simple-swizzle@^0.2.2:
   integrity sha1-pNprY1/8zMoz9w0Xy5JZLeleVXo=
   dependencies:
     is-arrayish "^0.3.1"
+
+slash@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/slash/-/slash-3.0.0.tgz#6539be870c165adbd5240220dbe361f1bc4d4634"
+  integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
 
 smart-buffer@^4.1.0:
   version "4.1.0"
