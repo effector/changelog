@@ -6,6 +6,7 @@ import replace from '@rollup/plugin-replace'
 import postcss from 'rollup-plugin-postcss'
 // import livereload from 'rollup-plugin-livereload'
 import run from '@rollup/plugin-run'
+// import alias from '@rollup/plugin-alias'
 
 import {PROJECT} from './builder/env'
 import {extractCss} from './builder/extractCssPlugin'
@@ -30,8 +31,8 @@ export default [
     },
     preserveEntrySignatures: false,
     external: [
-      'forest',
-      'forest/server',
+      // 'forest',
+      // 'forest/server',
       'prettier',
       'fs-extra',
       'cross-fetch',
@@ -39,6 +40,15 @@ export default [
       'path'
     ],
     plugins: [
+      // alias({
+      //   entries: {
+      //     'forest/server.mjs': './src/npm/forest/server.mjs',
+      //     'forest/server': './src/npm/forest/server.mjs',
+      //     forest: './src/npm/forest/forest.mjs',
+      //     'effector/effector.mjs': './src/npm/effector/effector.mjs',
+      //     effector: './src/npm/effector/effector.mjs'
+      //   }
+      // }),
       replace({
         'process.env.GITHUB_GQL_TOKEN': `"${
           process.env.GITHUB_GQL_TOKEN || 'no token'
@@ -52,7 +62,7 @@ export default [
         // exclude: /(\.re|node_modules.*)/
       }),
       resolve({
-        extensions: ['.js', '.ts', '.mjs', '.json']
+        extensions: ['.mjs', '.js', '.ts', '.json']
       }),
       postcss({
         extract: false,
@@ -68,7 +78,7 @@ export default [
     output: {
       dir: './dist/client',
       format: 'esm',
-      sourcemap: true,
+      sourcemap: false,
       interop: false,
       assetFileNames: 'assets/[name][extname]'
       // assetFileNames: 'assets/[name]-[hash][extname]'
@@ -81,7 +91,7 @@ export default [
     preserveEntrySignatures: false,
     external: [
       // 'forest',
-      'forest/server',
+      // 'forest/server',
       'prettier',
       'fs-extra',
       'cross-fetch',
@@ -89,6 +99,15 @@ export default [
       'path'
     ],
     plugins: [
+      // alias({
+      //   entries: {
+      //     'forest/server.mjs': './src/npm/forest/server.mjs',
+      //     'forest/server': './src/npm/forest/server.mjs',
+      //     forest: './src/npm/forest/forest.mjs',
+      //     'effector/effector.mjs': './src/npm/effector/effector.mjs',
+      //     effector: './src/npm/effector/effector.mjs'
+      //   }
+      // }),
       replace({
         'process.env.GITHUB_GQL_TOKEN': `"hidden"`
       }),
@@ -100,7 +119,7 @@ export default [
         // exclude: /(\.re|node_modules.*)/
       }),
       resolve({
-        extensions: ['.js', '.ts', '.mjs', '.json']
+        extensions: ['.mjs', '.js', '.ts', '.json']
       }),
       postcss({
         extract: true,
