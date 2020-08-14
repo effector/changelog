@@ -1823,10 +1823,10 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
-forest@^0.19.1:
-  version "0.19.1"
-  resolved "https://registry.yarnpkg.com/forest/-/forest-0.19.1.tgz#0b08b2c77955a7af449664f61207acc4aad97435"
-  integrity sha512-dWB9JVRnvT7DbRt3e8+eopQUNLh5NgPbC/6AE4LIwJdlhoY1ygbKq1pCjg9CgL/8ifpEC1nEVdPCGGri2fij1A==
+forest@^0.19.2:
+  version "0.19.2"
+  resolved "https://registry.yarnpkg.com/forest/-/forest-0.19.2.tgz#708fc64a9d8f2bc9c91dfb5e0daa3b3d9a6ce48e"
+  integrity sha512-hHCdKN7f5IeDkBQ3S6LPF7FdaQd54TVSrUV2Zntb8cF2pct6aIwOJTlzlxDhEVsauwyu82UKJcoAz7nQ7aiOlQ==
 
 forever-agent@~0.6.1:
   version "0.6.1"
