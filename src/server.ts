@@ -82,7 +82,10 @@ const HTMLHead = block({
       property: true
     })
     h('link', {
-      attr: {href: '/assets/src_styles_forest.css', rel: 'stylesheet'}
+      attr: {
+        href: '//changelog-asset.effector.dev/assets/src_styles_forest.css',
+        rel: 'stylesheet'
+      }
     })
     h('link', {
       attr: {
@@ -121,18 +124,18 @@ const App = block({
     h('html', () => {
       h('head', () => {
         HTMLHead()
-        h('script', {
-          attr: {
-            src: '/client.js',
-            type: 'module',
-            async: true
-          }
-        })
-        ClientScript()
       })
 
       h('body', () => {
         Body()
+        ClientScript()
+        h('script', {
+          attr: {
+            src: '//changelog-asset.effector.dev/client.js',
+            type: 'module',
+            async: true
+          }
+        })
       })
     })
   }

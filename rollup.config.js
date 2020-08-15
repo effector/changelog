@@ -7,6 +7,7 @@ import postcss from 'rollup-plugin-postcss'
 // import livereload from 'rollup-plugin-livereload'
 import run from '@rollup/plugin-run'
 // import alias from '@rollup/plugin-alias'
+import {terser} from 'rollup-plugin-terser'
 
 import {PROJECT} from './builder/env'
 import {extractCss} from './builder/extractCssPlugin'
@@ -70,7 +71,8 @@ export default [
         plugins: []
       }),
       html({
-        publicPath: '/'
+        publicPath: '/',
+        cdn: 'changelog-asset.effector.dev'
       }),
       run()
       // watch && livereload()
