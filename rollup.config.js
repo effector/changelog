@@ -10,6 +10,7 @@ import run from '@rollup/plugin-run'
 
 import {PROJECT} from './builder/env'
 import {extractCss} from './builder/extractCssPlugin'
+import {html} from './builder/htmlPlugin'
 
 const watch = process.env.ROLLUP_WATCH === 'true'
 const prod = process.env.NODE_ENV === 'production'
@@ -67,6 +68,9 @@ export default [
       postcss({
         extract: false,
         plugins: []
+      }),
+      html({
+        publicPath: '/'
       }),
       run()
       // watch && livereload()
