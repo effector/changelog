@@ -2124,21 +2124,6 @@ child-process-ext@^2.1.1:
     split2 "^3.1.1"
     stream-promise "^3.2.0"
 
-chokidar@^3.3.0:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.1.tgz#e905bdecf10eaa0a0b1db0c664481cc4cbc22ba1"
-  integrity sha512-TQTJyr2stihpC4Sya9hs2Xh+O2wf+igjL36Y75xx2WdHuiICcn/XJza46Jwt0eT5hVpQOzo3FpY3cj3RVYLX0g==
-  dependencies:
-    anymatch "~3.1.1"
-    braces "~3.0.2"
-    glob-parent "~5.1.0"
-    is-binary-path "~2.1.0"
-    is-glob "~4.0.1"
-    normalize-path "~3.0.0"
-    readdirp "~3.4.0"
-  optionalDependencies:
-    fsevents "~2.1.2"
-
 chokidar@^3.4.1:
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.2.tgz#38dc8e658dec3809741eb3ef7bb0a47fe424232d"
@@ -4828,21 +4813,6 @@ lie@~3.3.0:
   dependencies:
     immediate "~3.0.5"
 
-livereload-js@^3.1.0:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/livereload-js/-/livereload-js-3.3.1.tgz#61f887468086762e61fb2987412cf9d1dda99202"
-  integrity sha512-CBu1gTEfzVhlOK1WASKAAJ9Qx1fHECTq0SUB67sfxwQssopTyvzqTlgl+c0h9pZ6V+Fzd2rc510ppuNusg9teQ==
-
-livereload@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/livereload/-/livereload-0.9.1.tgz#65125dabdf2db4fd3f1169e953fe56e3bcc6f477"
-  integrity sha512-9g7sua11kkyZNo2hLRCG3LuZZwqexoyEyecSlV8cAsfAVVCZqLzVir6XDqmH0r+Vzgnd5LrdHDMyjtFnJQLAYw==
-  dependencies:
-    chokidar "^3.3.0"
-    livereload-js "^3.1.0"
-    opts ">= 1.2.0"
-    ws "^6.2.1"
-
 loader-utils@^1.1.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-1.4.0.tgz#c579b5e34cb34b1a74edc6c1fb36bfa371d5a613"
@@ -5099,15 +5069,15 @@ mime-types@^2.1.12, mime-types@~2.1.19:
   dependencies:
     mime-db "1.44.0"
 
-mime@>=2.0.3:
-  version "2.4.6"
-  resolved "https://registry.yarnpkg.com/mime/-/mime-2.4.6.tgz#e5b407c90db442f2beb5b162373d07b69affa4d1"
-  integrity sha512-RZKhC3EmpBchfTGBVb8fb+RL2cWyw/32lshnsETttkBAyAUXSGHxbEJWWRXc751DrIxG1q04b8QwMbAwkRPpUA==
-
 mime@^1.4.1:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
   integrity sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
+
+mime@^2.4.6:
+  version "2.4.6"
+  resolved "https://registry.yarnpkg.com/mime/-/mime-2.4.6.tgz#e5b407c90db442f2beb5b162373d07b69affa4d1"
+  integrity sha512-RZKhC3EmpBchfTGBVb8fb+RL2cWyw/32lshnsETttkBAyAUXSGHxbEJWWRXc751DrIxG1q04b8QwMbAwkRPpUA==
 
 mimic-fn@^1.0.0:
   version "1.2.0"
@@ -5584,7 +5554,7 @@ open@^7.1.0:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
 
-opener@1:
+opener@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.1.tgz#6d2f0e77f1a0af0032aca716c2c1fbb8e7e8abed"
   integrity sha512-goYSy5c2UXE4Ra1xixabeVh1guIX/ZV/YokJksb6q2lubWu6UbvPQ20p542/sFIll1nl8JnCyK9oBaOcCWXwvA==
@@ -5595,11 +5565,6 @@ opn@^5.5.0:
   integrity sha512-PqHpggC9bLV0VeWcdKhkpxY+3JTzetLSqTCWL/z/tFIbI6G8JCjondXklT1JinczLz2Xib62sSp0T/gKT4KksA==
   dependencies:
     is-wsl "^1.1.0"
-
-"opts@>= 1.2.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/opts/-/opts-2.0.0.tgz#c0b2cebdf53eaeafc21ed844e34773758dcf41e2"
-  integrity sha512-rPleeyX48sBEc4aj7rAok5dCbvRdYpdbIdSRR4gnIK98a7Rvd4l3wlv4YHQr2mwPQTpKQiw8uipi/WoyItDINg==
 
 os-homedir@^1.0.0:
   version "1.0.2"
@@ -6643,13 +6608,6 @@ rimraf@^3.0.2:
   dependencies:
     glob "^7.1.3"
 
-rollup-plugin-livereload@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-livereload/-/rollup-plugin-livereload-1.3.0.tgz#8da90df13df6502b9d982997d6ac871092f15fdd"
-  integrity sha512-abyqXaB21+nFHo+vJULBqfzNx6zXABC19UyvqgDfdoxR/8pFAd041GO+GIUe8ZYC2DbuMUmioh1Lvbk14YLZgw==
-  dependencies:
-    livereload "^0.9.1"
-
 rollup-plugin-postcss@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/rollup-plugin-postcss/-/rollup-plugin-postcss-3.1.2.tgz#e862033b96fabb73390fd4ccbee0155385d30e46"
@@ -6669,14 +6627,6 @@ rollup-plugin-postcss@^3.1.2:
     rollup-pluginutils "^2.8.2"
     safe-identifier "^0.4.1"
     style-inject "^0.3.0"
-
-rollup-plugin-serve@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-serve/-/rollup-plugin-serve-1.0.3.tgz#409a52303efcd78911834a37db5835b76a2f8e61"
-  integrity sha512-DziGAVsXQVzQuT1v4vcv2l0GURnGYsX8m/FV1XzZ18VG3PWSedLaOSQFiW6RLHF7jB/F+CxlwK4YCUVZs8vxbg==
-  dependencies:
-    mime ">=2.0.3"
-    opener "1"
 
 rollup-plugin-terser@^6.1.0:
   version "6.1.0"
@@ -7895,7 +7845,7 @@ write-file-atomic@^2.0.0, write-file-atomic@^2.4.2, write-file-atomic@^2.4.3:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.2"
 
-ws@<7.0.0, ws@^6.2.1:
+ws@<7.0.0:
   version "6.2.1"
   resolved "https://registry.yarnpkg.com/ws/-/ws-6.2.1.tgz#442fdf0a47ed64f59b6a5d8ff130f4748ed524fb"
   integrity sha512-GIyAXC2cB7LjvpgMt9EKS2ldqr0MTrORaleiOno6TweZ6r3TKtoFQWay/2PceJ3RuBasOHzXNn5Lrw1X0bEjqA==

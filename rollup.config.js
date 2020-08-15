@@ -4,14 +4,13 @@ import babel from '@rollup/plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import postcss from 'rollup-plugin-postcss'
-// import livereload from 'rollup-plugin-livereload'
 import run from '@rollup/plugin-run'
 // import alias from '@rollup/plugin-alias'
-import {terser} from 'rollup-plugin-terser'
 
 import {PROJECT} from './builder/env'
 import {extractCss} from './builder/extractCssPlugin'
 import {html} from './builder/htmlPlugin'
+import {serve} from './builder/servePlugin'
 
 const watch = process.env.ROLLUP_WATCH === 'true'
 const prod = process.env.NODE_ENV === 'production'
@@ -131,12 +130,8 @@ export default [
         extract: true,
         plugins: []
       }),
-      prod && import('rollup-plugin-terser').then(({terser}) => terser()),
-      watch &&
-        import('rollup-plugin-serve').then(({default: serve}) =>
-          serve('dist/client')
-        )
-      // watch && livereload()
+      // prod && import('rollup-plugin-terser').then(({terser}) => terser()),
+      watch && serve({contentBase: 'dist/client', livereload: true})
     ]
   }
 ]
