@@ -24,11 +24,16 @@ const defaultTemplate = async ({bundleDef: {publicPath, styles, scripts}}) => {
 const defaults = {
   fileName: 'index.html',
   publicPath: '',
-  template: defaultTemplate
+  template: defaultTemplate,
+  cdn: null
 }
 
 export function html(opts = {}) {
-  const {fileName, publicPath, template} = Object.assign({}, defaults, opts)
+  const {fileName, publicPath, template, cdn} = Object.assign(
+    {},
+    defaults,
+    opts
+  )
 
   return {
     name: 'html',
@@ -41,6 +46,7 @@ export function html(opts = {}) {
       const bundleDef = {
         scriptType,
         publicPath,
+        cdn,
         scripts: [],
         styles: [],
         assets: []
@@ -54,15 +60,16 @@ export function html(opts = {}) {
         const extension = extname(fileName).substring(1)
         if (!files[extension]) files[extension] = []
         files[extension].push(file)
+        const fullPath = createPath({cdn, publicPath, fileName})
         switch (extension) {
           case 'css':
-            bundleDef.styles.push(fileName)
+            bundleDef.styles.push(fullPath)
             break
           case 'js':
-            bundleDef.scripts.push(fileName)
+            bundleDef.scripts.push(fullPath)
             break
           default:
-            bundleDef.assets.push(fileName)
+            bundleDef.assets.push(fullPath)
         }
       }
       const source = await template({
@@ -84,4 +91,31 @@ export function html(opts = {}) {
       // })
     }
   }
+}
+
+function createPath({cdn: cdnRaw, publicPath: publicPathRaw, fileName}) {
+  let cdn = ''
+  let publicPath = ''
+  if (cdnRaw) {
+    if (!cdnRaw.endsWith('/')) cdnRaw = `${cdnRaw}/`
+    if (cdnRaw.startsWith('http') || cdnRaw.startsWith('/')) {
+      cdn = cdnRaw
+    } else {
+      cdn = `//${cdnRaw}`
+    }
+  }
+  if (publicPathRaw) {
+    if (publicPathRaw === '/') {
+      publicPath = cdn ? '' : publicPathRaw
+    } else {
+      if (publicPathRaw.startsWith('/') && cdn) {
+        publicPathRaw = publicPathRaw.slice(1)
+      }
+      if (!publicPathRaw.endsWith('/')) {
+        publicPathRaw = `${publicPathRaw}/`
+      }
+      publicPath = publicPathRaw
+    }
+  }
+  return `${cdn}${publicPath}${fileName}`
 }
