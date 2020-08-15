@@ -1,0 +1,168 @@
+service: effdev-changelog
+package:
+  exclude:
+    - package.json
+    - node_modules/**
+    - yarn.lock
+    - tsconfig.json
+    - builder/**
+plugins:
+  - serverless-stack-termination-protection
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 512
+  timeout: 15
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  logs:
+    restApi: true
+  tags:
+    effdev: changelog
+    prod: 'true'
+custom:
+  certificateARN: ${file(./domain.json):certificateArn}
+  assetUrl: changelog-asset.effector.dev
+  contentUrl: changelog-next.effector.dev
+resources:
+  Resources:
+    AssetBucket:
+      Type: 'AWS::S3::Bucket'
+      DeletionPolicy: Delete
+      Metadata:
+        Comment: bucket for ${self:service} assets (${self:provider.stage})
+      Properties:
+        AccessControl: Private
+        BucketName: ${self:service}--asset--${self:provider.stage}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+              AllowedOrigins:
+                - '*'
+    ContentBucket:
+      Type: 'AWS::S3::Bucket'
+      DeletionPolicy: Delete
+      Metadata:
+        Comment: bucket for ${self:service} content (${self:provider.stage})
+      Properties:
+        AccessControl: Private
+        BucketName: ${self:service}--content--${self:provider.stage}
+    AssetAccessIdentity:
+      Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+      Metadata:
+        Comment: 'Access AssetBucket only through CloudFront'
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: 'Access AssetBucket only through CloudFront'
+    ContentAccessIdentity:
+      Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+      Metadata:
+        Comment: 'Access ContentBucket only through CloudFront'
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: 'Access ContentBucket only through CloudFront'
+    AssetBucketPolicy:
+      Type: 'AWS::S3::BucketPolicy'
+      Metadata:
+        Comment: allow cloudfront to access ${self:service} asset bucket (${self:provider.stage})
+      Properties:
+        Bucket: {Ref: AssetBucket}
+        PolicyDocument:
+          Statement:
+            - Action:
+                - s3:GetObject
+              Effect: Allow
+              Principal:
+                CanonicalUser:
+                  {Fn::GetAtt: [AssetAccessIdentity, S3CanonicalUserId]}
+              Resource:
+                - {Fn::Join: ['', [{Fn::GetAtt: [AssetBucket, Arn]}, '/*']]}
+    ContentBucketPolicy:
+      Type: 'AWS::S3::BucketPolicy'
+      Metadata:
+        Comment: allow cloudfront to access ${self:service} content bucket (${self:provider.stage})
+      Properties:
+        Bucket: {Ref: ContentBucket}
+        PolicyDocument:
+          Statement:
+            - Action:
+                - s3:GetObject
+              Effect: Allow
+              Principal:
+                CanonicalUser:
+                  {Fn::GetAtt: [ContentAccessIdentity, S3CanonicalUserId]}
+              Resource:
+                - {Fn::Join: ['', [{Fn::GetAtt: [ContentBucket, Arn]}, '/*']]}
+    AssetCDN:
+      Type: 'AWS::CloudFront::Distribution'
+      DependsOn: AssetAccessIdentity
+      Properties:
+        DistributionConfig:
+          Comment: cdn for ${self:service} assets (${self:provider.stage})
+          Aliases:
+            - ${self:custom.assetUrl}
+          DefaultCacheBehavior:
+            TargetOriginId: AssetBucketOrigin
+            ViewerProtocolPolicy: 'redirect-to-https'
+            DefaultTTL: 600 # ten minutes
+            MaxTTL: 600 # ten minutes
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+              Headers:
+                - Origin
+          DefaultRootObject: index.html
+          Enabled: true
+          PriceClass: PriceClass_100
+          HttpVersion: http2
+          ViewerCertificate:
+            AcmCertificateArn: ${self:custom.certificateARN}
+            SslSupportMethod: sni-only
+          Origins:
+            - Id: AssetBucketOrigin
+              DomainName: {Fn::GetAtt: [AssetBucket, DomainName]}
+              S3OriginConfig:
+                OriginAccessIdentity:
+                  Fn::Join:
+                    - /
+                    - - origin-access-identity
+                      - cloudfront
+                      - {Ref: AssetAccessIdentity}
+    ContentCDN:
+      Type: 'AWS::CloudFront::Distribution'
+      DependsOn: ContentAccessIdentity
+      Properties:
+        DistributionConfig:
+          Comment: cdn for ${self:service} content (${self:provider.stage})
+          Aliases:
+            - ${self:custom.contentUrl}
+          DefaultCacheBehavior:
+            TargetOriginId: ContentBucketOrigin
+            ViewerProtocolPolicy: 'redirect-to-https'
+            DefaultTTL: 600 # ten minutes
+            MaxTTL: 600 # ten minutes
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+          DefaultRootObject: index.html
+          Enabled: true
+          PriceClass: PriceClass_100
+          HttpVersion: http2
+          ViewerCertificate:
+            AcmCertificateArn: ${self:custom.certificateARN}
+            SslSupportMethod: sni-only
+          Origins:
+            - Id: ContentBucketOrigin
+              DomainName: {Fn::GetAtt: [ContentBucket, DomainName]}
+              S3OriginConfig:
+                OriginAccessIdentity:
+                  Fn::Join:
+                    - /
+                    - - origin-access-identity
+                      - cloudfront
+                      - {Ref: ContentAccessIdentity}
