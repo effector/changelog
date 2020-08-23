@@ -6,7 +6,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "npx rollup -c rollup.config.js && node dist/index.js"
+    "start": "npx rollup -c builderBuildConfig.js --watch",
+    "build": "npx rollup -c builderBuildConfig.js"
   },
   "dependencies": {
     "cross-fetch": "^3.0.5",

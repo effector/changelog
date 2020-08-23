@@ -4,14 +4,16 @@ import {
   AstToken,
   ContentAstToken,
   ParentAstToken,
-  extractText
+  extractText,
+  parseToAST
 } from './mdParser'
 
 import {MANY_LINES, LARGE_ARTICLE} from './env'
 import {VersionDate} from './index.h'
 
 import {styles} from './styles'
-import {Store, createDomain, combine, restore} from 'effector'
+import {Store, combine} from 'effector'
+import {app} from './root'
 
 type ReleaseNote = {
   version: string
@@ -29,12 +31,34 @@ type ReleaseGroup = {
   releases: ReleaseNote[]
 }
 
-export const app = createDomain()
-export const sections = app.createStore<AstToken[][]>([])
-export const versionDates = app.createStore<VersionDate[]>([])
+export {app}
+export const changelogMarkdown = app.createStore('')
+const sections = changelogMarkdown.map(md => {
+  const ast = parseToAST(md)
+  const sections: AstToken[][] = []
+  let releaseHeaderAppeared = false
+  let currentSection: AstToken[] = []
+  for (const token of ast) {
+    if (token.type === 'heading') {
+      if (token.level === 1) {
+        currentSection = []
+        continue
+      }
+      if (currentSection.length > 0) {
+        if (releaseHeaderAppeared) sections.push(currentSection)
+      }
+      releaseHeaderAppeared = true
+      currentSection = [token]
+    } else {
+      currentSection.push(token)
+    }
+  }
+  if (currentSection.length > 0 && releaseHeaderAppeared)
+    sections.push(currentSection)
+  return sections
+})
 
-export const setClientState = app.createEvent<any>()
-export const clientState = restore(setClientState, {})
+export const versionDates = app.createStore<VersionDate[]>([])
 
 const releaseGroups = combine(sections, versionDates, createReleaseGroups)
 
@@ -212,6 +236,15 @@ const Token = rec<AstToken>(({store}) => {
           attr: {
             src: remap(store, 'href')
           }
+        })
+      },
+      __({store}) {
+        h('span', {
+          style: {
+            color: 'firebrick',
+            fontSize: '3em'
+          },
+          text: ['token ', remap(store, 'type')]
         })
       }
     }

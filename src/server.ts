@@ -1,26 +1,29 @@
 import {resolve} from 'path'
 //@ts-ignore
 import {outputFile, copy} from 'fs-extra'
-import {fork, serialize, allSettled} from 'effector'
-import {h, text, block, spec} from 'forest'
+import {fork, serialize, allSettled, restore} from 'effector'
+import {h, block, spec} from 'forest'
 import {renderStatic} from 'forest/server'
 
-import {
-  Body,
-  app,
-  sections,
-  versionDates,
-  clientState,
-  setClientState
-} from './app'
+import {app} from './root'
+import {changelogMarkdown, versionDates} from './app'
 import {format} from 'prettier'
 import {fetchData} from './fetchData'
+
+const USE_SPA = !!process.env.USE_SPA
+
+// const basePath = '//changelog-asset.effector.dev'
+const basePath = ''
+
+export const setClientState = app.createEvent<any>()
+export const clientState = restore(setClientState, {})
 
 const ClientScript = block({
   fn() {
     const clientStateString = clientState.map(state => JSON.stringify(state))
-    h('script', () => {
-      text`window.__INITIAL_STATE__ = ${clientStateString}`
+    h('script', {
+      attr: {id: 'initial_state', type: 'application/json'},
+      text: clientStateString
     })
   }
 })
@@ -83,7 +86,7 @@ const HTMLHead = block({
     })
     h('link', {
       attr: {
-        href: '//changelog-asset.effector.dev/assets/src_styles_forest.css',
+        href: `${basePath}/assets/src_styles_forest.css`,
         rel: 'stylesheet'
       }
     })
@@ -127,11 +130,13 @@ const App = block({
       })
 
       h('body', () => {
-        Body()
+        if (!USE_SPA) {
+          // Body()
+        }
         ClientScript()
         h('script', {
           attr: {
-            src: '//changelog-asset.effector.dev/client.js',
+            src: `${basePath}/client.js`,
             type: 'module',
             async: true
           }
@@ -162,7 +167,7 @@ async function generateStatic() {
   const data = await fetchData()
   const scope = fork(app, {
     values: new Map()
-      .set(sections, data.sections)
+      .set(changelogMarkdown, data.changelogContent)
       .set(versionDates, data.versionDates)
   })
 
@@ -181,7 +186,8 @@ async function generateStatic() {
   })
 
   console.log('format')
-  const rendered = format(renderedRaw, {parser: 'html', printWidth: 120})
+  let rendered = renderedRaw
+  rendered = format(renderedRaw, {parser: 'html', printWidth: 120})
 
   console.log('output')
   await Promise.all([
@@ -192,6 +198,11 @@ async function generateStatic() {
     )
   ])
   console.log('end')
+  if (process.send) {
+    // process.send({type: 'result', value: 'foo'})
+  }
 }
 
+// if (!USE_SPA) {
 generateStatic()
+// }

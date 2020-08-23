@@ -4,12 +4,21 @@ import {app, Body} from './app'
 
 window.addEventListener('load', () => {
   const scope = fork(app, {
-    values: (window as any).__INITIAL_STATE__
+    values: getInitialState()
   })
 
   using(document.body, {
     scope,
     fn: Body,
-    hydrate: true
+    hydrate: !process.env.USE_SPA
   })
 })
+
+function getInitialState() {
+  const json = document.getElementById('initial_state') as HTMLScriptElement
+  if (json) {
+    try {
+      return JSON.parse(json.innerText)
+    } catch (err) {}
+  }
+}
