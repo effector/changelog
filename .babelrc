@@ -17,5 +17,12 @@
       }
     ]
   ],
-  "plugins": ["effector/babel-plugin"]
+  "plugins": [
+    [
+      "effector/babel-plugin",
+      {
+        "combines": false
+      }
+    ]
+  ]
 }
