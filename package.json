@@ -29,7 +29,6 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^8.1.0",
     "@rollup/plugin-replace": "^2.3.3",
-    "@rollup/plugin-run": "^2.0.2",
     "mime": "^2.4.6",
     "opener": "^1.5.1",
     "pacote": "^11.1.10",
