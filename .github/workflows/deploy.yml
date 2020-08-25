@@ -34,8 +34,6 @@ jobs:
       env:
         USE_SPA: true
         GITHUB_GQL_TOKEN: ${{ secrets.gh_gql_token }}
-    - name: log build
-      run: tree dist
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
