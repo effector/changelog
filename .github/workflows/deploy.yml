@@ -34,5 +34,21 @@ jobs:
       env:
         USE_SPA: true
         GITHUB_GQL_TOKEN: ${{ secrets.gh_gql_token }}
-    - name: deploy
-      run: ls dist
+    - name: log build
+      run: tree dist
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.aws_access_key_id }}
+        aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
+        aws-region: us-east-1
+    - name: upload assets
+      run: aws s3 sync $S3_DIRECTORY s3://$S3_BUCKET_NAME/ --acl=public-read --delete --exclude 'index.html' --size-only
+      env:
+        S3_DIRECTORY: './dist/client'
+        S3_BUCKET_NAME: 'effdev-changelog--asset--dev'
+    - name: upload content
+      run: aws s3 sync $S3_DIRECTORY s3://$S3_BUCKET_NAME/ --acl=public-read --delete
+      env:
+        S3_DIRECTORY: './dist/content'
+        S3_BUCKET_NAME: 'effdev-changelog--content--dev'
