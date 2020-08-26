@@ -21,7 +21,7 @@ provider:
     effdev: changelog
     prod: 'true'
 custom:
-  certificateARN: ${file(./domain.json):certificateArn}
+  certificateARN: ${file(./deployConfig.json):certificateArn}
   assetUrl: changelog-asset.effector.dev
   contentUrl: changelog-next.effector.dev
 resources:
