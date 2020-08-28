@@ -192,6 +192,7 @@ async function generateStatic() {
   console.log('output')
   await Promise.all([
     outputFile(resolve(__dirname, 'client', 'index.html'), rendered),
+    outputFile(resolve(__dirname, 'content', 'index.html'), rendered),
     copy(
       resolve(process.cwd(), 'src', 'assets'),
       resolve(__dirname, 'client', 'assets')
