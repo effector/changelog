@@ -6,14 +6,13 @@ import {h, block, spec} from 'forest'
 import {renderStatic} from 'forest/server'
 
 import {app} from './root'
-import {changelogMarkdown, versionDates} from './app'
+import {changelogMarkdown, versionDates, Body} from './app'
 import {format} from 'prettier'
 import {fetchData} from './fetchData'
 
 const USE_SPA = process.env.USE_SPA === 'true'
 
-// const basePath = '//changelog-asset.effector.dev'
-const basePath = ''
+const basePath = USE_SPA ? '' : '//changelog-asset.effector.dev'
 
 export const setClientState = app.createEvent<any>()
 export const clientState = restore(setClientState, {})
@@ -131,7 +130,7 @@ const App = block({
 
       h('body', () => {
         if (!USE_SPA) {
-          // Body()
+          Body()
         }
         ClientScript()
         h('script', {
@@ -187,7 +186,9 @@ async function generateStatic() {
 
   console.log('format')
   let rendered = renderedRaw
-  rendered = format(renderedRaw, {parser: 'html', printWidth: 120})
+  if (USE_SPA) {
+    rendered = format(renderedRaw, {parser: 'html', printWidth: 120})
+  }
 
   console.log('output')
   await Promise.all([
