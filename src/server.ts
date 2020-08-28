@@ -10,7 +10,7 @@ import {changelogMarkdown, versionDates} from './app'
 import {format} from 'prettier'
 import {fetchData} from './fetchData'
 
-const USE_SPA = !!process.env.USE_SPA
+const USE_SPA = process.env.USE_SPA === 'true'
 
 // const basePath = '//changelog-asset.effector.dev'
 const basePath = ''

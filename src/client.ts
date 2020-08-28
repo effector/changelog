@@ -10,7 +10,7 @@ window.addEventListener('load', () => {
   using(document.body, {
     scope,
     fn: Body,
-    hydrate: !process.env.USE_SPA
+    hydrate: process.env.USE_SPA !== 'true'
   })
 })
 

@@ -56,7 +56,7 @@ const fullConfig = [
       // }),
       replace({
         'process.env.GITHUB_GQL_TOKEN': `"${GITHUB_GQL_TOKEN}"`,
-        'process.env.USE_SPA': `${USE_SPA}`
+        'process.env.USE_SPA': `"${USE_SPA}"`
       }),
       extractCss({project: PROJECT}),
       babel({
@@ -118,7 +118,7 @@ const fullConfig = [
       // }),
       replace({
         'process.env.GITHUB_GQL_TOKEN': `"hidden"`,
-        'process.env.USE_SPA': `${USE_SPA}`
+        'process.env.USE_SPA': `"${USE_SPA}"`
       }),
       extractCss({project: PROJECT}),
       babel({
