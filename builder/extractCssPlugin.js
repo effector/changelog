@@ -1,4 +1,4 @@
-import {relative} from 'path'
+import {relative, join} from 'path'
 
 import {serialize, compile, stringify} from 'stylis'
 import generate from '@babel/generator'
@@ -11,7 +11,7 @@ const specDataCall = template('cssSpec({data: {ID: true}})')
 const specDataVarCall = template('cssSpec({data: {ID: true},styleVar: VAR})')
 
 export function extractCss({project}) {
-  const root = process.cwd()
+  const root = join(process.cwd(), 'src')
   const cssLookup = new Map()
   const mathFileName = new RegExp(`(?<=.*${project}\/)(.*)(?=\.ts$)`, 'gi')
   return {
@@ -195,7 +195,8 @@ export function extractCss({project}) {
         )
         const cssSource = cssRecords.join(`\n`)
         const rand = Math.random().toString(36).slice(2, 8)
-        const cssFileName = `${fileName.replace('/', '_')}_forest.css`
+        const cssFileName = `${fileName.replace(/\//g, '_')}_forest.css`
+        console.log({fileName, sourceFileName, root, cssFileName})
         cssLookup.set(cssFileName, cssSource)
         const cssID = this.emitFile({
           type: 'asset',
