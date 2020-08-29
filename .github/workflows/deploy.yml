@@ -48,7 +48,7 @@ jobs:
         S3_DIRECTORY: './dist/client'
         S3_BUCKET_NAME: 'effdev-changelog--asset--dev'
     - name: upload content
-      run: aws s3 sync $S3_DIRECTORY s3://$S3_BUCKET_NAME/ --acl=public-read --delete
+      run: aws s3 sync $S3_DIRECTORY s3://$S3_BUCKET_NAME/ --content-type 'text/html' --acl=public-read --delete
       env:
         S3_DIRECTORY: './dist/content'
         S3_BUCKET_NAME: 'effdev-changelog--content--dev'
