@@ -85,7 +85,7 @@ const HTMLHead = block({
     })
     h('link', {
       attr: {
-        href: `${basePath}/assets/src_styles_forest.css`,
+        href: `${basePath}/assets/styles_forest.css`,
         rel: 'stylesheet'
       }
     })

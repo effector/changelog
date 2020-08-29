@@ -13,13 +13,16 @@ const specDataVarCall = template('cssSpec({data: {ID: true},styleVar: VAR})')
 export function extractCss({project}) {
   const root = join(process.cwd(), 'src')
   const cssLookup = new Map()
-  const mathFileName = new RegExp(`(?<=.*${project}\/)(.*)(?=\.ts$)`, 'gi')
   return {
     name: 'forest-extract-css',
     transform(code, id) {
-      if (String(id).match(mathFileName)) {
+      id = String(id)
+      if (id.startsWith(root) && id.endsWith('.ts')) {
         const sourceFileName = relative(root, id)
-        const [fileName] = String(id).match(mathFileName)
+        const fileName = id
+          .replace(root, '')
+          .replace('.ts', '')
+          .replace(/^\//g, '')
         const hasCss =
           code.includes('css`') || code.includes('createGlobalStyle`')
         if (!hasCss) return null
@@ -196,7 +199,6 @@ export function extractCss({project}) {
         const cssSource = cssRecords.join(`\n`)
         const rand = Math.random().toString(36).slice(2, 8)
         const cssFileName = `${fileName.replace(/\//g, '_')}_forest.css`
-        console.log({fileName, sourceFileName, root, cssFileName})
         cssLookup.set(cssFileName, cssSource)
         const cssID = this.emitFile({
           type: 'asset',
