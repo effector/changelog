@@ -19,7 +19,7 @@ const prod = process.env.NODE_ENV === 'production'
 const GITHUB_GQL_TOKEN = process.env.GITHUB_GQL_TOKEN || 'no token'
 const USE_SPA = process.env.USE_SPA === 'true'
 
-const fullConfig = [
+const [serverConfig, clientConfig] = [
   {
     input: 'src/server.ts',
     cache: false,
@@ -144,7 +144,7 @@ runGenerator()
 async function runGenerator() {
   if (watch) {
     //@ts-ignore
-    const watcher = rollupWatch(fullConfig)
+    const watcher = rollupWatch([clientConfig, serverConfig])
     watcher.on('event', event => {
       // event.code can be one of:
       //   START        — the watcher is (re)starting
@@ -155,20 +155,16 @@ async function runGenerator() {
       // console.log('watcher event', event)
     })
   } else {
-    console.log('generate bundles')
-    const [serverBundle, clientBundle] = await Promise.all([
-      //@ts-ignore
-      rollup(fullConfig[0]),
-      //@ts-ignore
-      rollup(fullConfig[1])
-    ])
-    console.log('generate outputs')
-    const [serverOutput, clientOutput] = await Promise.all([
-      //@ts-ignore
-      serverBundle.write(fullConfig[0].output),
-      //@ts-ignore
-      clientBundle.write(fullConfig[1].output)
-    ])
+    console.log('generate client')
+    //@ts-ignore
+    const clientBundle = await rollup(clientConfig)
+    //@ts-ignore
+    const clientOutput = await clientBundle.write(clientConfig.output)
+    console.log('generate server')
+    //@ts-ignore
+    const serverBundle = await rollup(serverConfig)
+    //@ts-ignore
+    const serverOutput = await serverBundle.write(serverConfig.output)
     console.log('complete')
   }
 }
