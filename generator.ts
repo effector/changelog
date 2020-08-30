@@ -19,6 +19,9 @@ const prod = process.env.NODE_ENV === 'production'
 const GITHUB_GQL_TOKEN = process.env.GITHUB_GQL_TOKEN || 'no token'
 const USE_SPA = process.env.USE_SPA === 'true'
 
+// const assetFileNames = 'assets/[name]-[hash][extname]'
+const assetFileNames = 'assets/[name][extname]'
+
 const [serverConfig, clientConfig] = [
   {
     input: 'src/server.ts',
@@ -27,7 +30,8 @@ const [serverConfig, clientConfig] = [
       dir: './dist',
       format: 'commonjs',
       sourcemap: true,
-      interop: false
+      interop: false,
+      assetFileNames
     },
     onwarn(warning, rollupWarn) {
       if (warning.code !== 'CIRCULAR_DEPENDENCY') {
@@ -72,10 +76,6 @@ const [serverConfig, clientConfig] = [
         extract: false,
         plugins: []
       }),
-      html({
-        publicPath: '/',
-        cdn: 'changelog-asset.effector.dev'
-      }),
       run()
       // watch && livereload()
     ]
@@ -88,8 +88,7 @@ const [serverConfig, clientConfig] = [
       format: 'esm',
       sourcemap: false,
       interop: false,
-      assetFileNames: 'assets/[name][extname]'
-      // assetFileNames: 'assets/[name]-[hash][extname]'
+      assetFileNames
     },
     onwarn(warning, rollupWarn) {
       if (warning.code !== 'CIRCULAR_DEPENDENCY') {
@@ -133,6 +132,10 @@ const [serverConfig, clientConfig] = [
       postcss({
         extract: true,
         plugins: []
+      }),
+      html({
+        publicPath: '/',
+        cdn: 'changelog-asset.effector.dev'
       }),
       // prod && import('rollup-plugin-terser').then(({terser}) => terser()),
       //@ts-ignore

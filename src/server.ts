@@ -1,8 +1,8 @@
 import {resolve} from 'path'
 //@ts-ignore
-import {outputFile, copy} from 'fs-extra'
+import {outputFile, copy, readFile} from 'fs-extra'
 import {fork, serialize, allSettled, restore} from 'effector'
-import {h, block, spec} from 'forest'
+import {h, block, spec, list} from 'forest'
 import {renderStatic} from 'forest/server'
 
 import {app} from './root'
@@ -14,8 +14,11 @@ const USE_SPA = process.env.USE_SPA === 'true'
 
 const basePath = USE_SPA ? '' : '//changelog-asset.effector.dev'
 
-export const setClientState = app.createEvent<any>()
-export const clientState = restore(setClientState, {})
+const setClientState = app.createEvent<any>()
+const clientState = restore(setClientState, {})
+
+const styles = app.createStore<string[]>([])
+const scripts = app.createStore<string[]>([])
 
 const ClientScript = block({
   fn() {
@@ -83,11 +86,20 @@ const HTMLHead = block({
         'Changelog for effector, effector-react and effector-vue releases',
       property: true
     })
-    h('link', {
-      attr: {
-        href: `${basePath}/assets/styles_forest.css`,
-        rel: 'stylesheet'
-      }
+    list(styles, ({store}) => {
+      const href = store.map(fileName =>
+        createPath({
+          cdn: basePath,
+          publicPath: '/',
+          fileName
+        })
+      )
+      h('link', {
+        attr: {
+          href,
+          rel: 'stylesheet'
+        }
+      })
     })
     h('link', {
       attr: {
@@ -121,6 +133,41 @@ const HTMLHead = block({
   }
 })
 
+function createPath({
+  cdn: cdnRaw,
+  publicPath: publicPathRaw,
+  fileName
+}: {
+  cdn: string | null
+  publicPath?: string | null
+  fileName: string
+}) {
+  let cdn = ''
+  let publicPath = ''
+  if (cdnRaw) {
+    if (!cdnRaw.endsWith('/')) cdnRaw = `${cdnRaw}/`
+    if (cdnRaw.startsWith('http') || cdnRaw.startsWith('/')) {
+      cdn = cdnRaw
+    } else {
+      cdn = `//${cdnRaw}`
+    }
+  }
+  if (publicPathRaw) {
+    if (publicPathRaw === '/') {
+      publicPath = cdn ? '' : publicPathRaw
+    } else {
+      if (publicPathRaw.startsWith('/') && cdn) {
+        publicPathRaw = publicPathRaw.slice(1)
+      }
+      if (!publicPathRaw.endsWith('/')) {
+        publicPathRaw = `${publicPathRaw}/`
+      }
+      publicPath = publicPathRaw
+    }
+  }
+  return `${cdn}${publicPath}${fileName}`
+}
+
 const App = block({
   fn() {
     h('html', () => {
@@ -133,12 +180,21 @@ const App = block({
           Body()
         }
         ClientScript()
-        h('script', {
-          attr: {
-            src: `${basePath}/client.js`,
-            type: 'module',
-            async: true
-          }
+        list(scripts, ({store}) => {
+          const src = store.map(fileName =>
+            createPath({
+              cdn: basePath,
+              publicPath: '/',
+              fileName
+            })
+          )
+          h('script', {
+            attr: {
+              src,
+              type: 'module',
+              async: true
+            }
+          })
         })
       })
     })
@@ -161,13 +217,27 @@ function Meta(
   })
 }
 
+async function readBundleDef(): Promise<{
+  scripts: string[]
+  styles: string[]
+  assets: string[]
+}> {
+  const raw = await readFile(
+    resolve(__dirname, 'client', 'bundleDef.json'),
+    'utf8'
+  )
+  return JSON.parse(raw)
+}
+
 async function generateStatic() {
   console.log('start')
-  const data = await fetchData()
+  const [data, bundleDef] = await Promise.all([fetchData(), readBundleDef()])
   const scope = fork(app, {
     values: new Map()
       .set(changelogMarkdown, data.changelogContent)
       .set(versionDates, data.versionDates)
+      .set(styles, bundleDef.styles)
+      .set(scripts, bundleDef.scripts)
   })
 
   const serialized = serialize(scope, {
@@ -184,9 +254,9 @@ async function generateStatic() {
     fn: App
   })
 
-  console.log('format')
   let rendered = renderedRaw
   if (USE_SPA) {
+    console.log('format')
     rendered = format(renderedRaw, {parser: 'html', printWidth: 120})
   }
 
