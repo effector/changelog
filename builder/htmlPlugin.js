@@ -60,16 +60,15 @@ export function html(opts = {}) {
         const extension = extname(fileName).substring(1)
         if (!files[extension]) files[extension] = []
         files[extension].push(file)
-        const fullPath = createPath({cdn, publicPath, fileName})
         switch (extension) {
           case 'css':
-            bundleDef.styles.push(fullPath)
+            bundleDef.styles.push(fileName)
             break
           case 'js':
-            bundleDef.scripts.push(fullPath)
+            bundleDef.scripts.push(fileName)
             break
           default:
-            bundleDef.assets.push(fullPath)
+            bundleDef.assets.push(fileName)
         }
       }
       const source = await template({
@@ -82,40 +81,6 @@ export function html(opts = {}) {
         name: 'bundle definition',
         fileName: 'bundleDef.json'
       })
-
-      // this.emitFile({
-      //   type: 'asset',
-      //   source,
-      //   name: 'html asset',
-      //   fileName
-      // })
     }
   }
-}
-
-function createPath({cdn: cdnRaw, publicPath: publicPathRaw, fileName}) {
-  let cdn = ''
-  let publicPath = ''
-  if (cdnRaw) {
-    if (!cdnRaw.endsWith('/')) cdnRaw = `${cdnRaw}/`
-    if (cdnRaw.startsWith('http') || cdnRaw.startsWith('/')) {
-      cdn = cdnRaw
-    } else {
-      cdn = `//${cdnRaw}`
-    }
-  }
-  if (publicPathRaw) {
-    if (publicPathRaw === '/') {
-      publicPath = cdn ? '' : publicPathRaw
-    } else {
-      if (publicPathRaw.startsWith('/') && cdn) {
-        publicPathRaw = publicPathRaw.slice(1)
-      }
-      if (!publicPathRaw.endsWith('/')) {
-        publicPathRaw = `${publicPathRaw}/`
-      }
-      publicPath = publicPathRaw
-    }
-  }
-  return `${cdn}${publicPath}${fileName}`
 }
