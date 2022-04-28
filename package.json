@@ -10,7 +10,7 @@
     "build": "npx rollup -c builderBuildConfig.js"
   },
   "dependencies": {
-    "cross-fetch": "^3.0.5",
+    "cross-fetch": "^3.1.5",
     "dotenv": "^8.2.0",
     "effector": "^21.2.2",
     "forest": "^0.19.2",
