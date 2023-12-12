@@ -222,6 +222,9 @@ createGlobalStyle`
   --md-075: calc(var(--md-025) * 3);
   --md-05: calc(var(--md) / 2);
   --md-025: calc(var(--md) / 4);
+}
+
+:root {
   --black: #120309;
   --orange: #e95801;
   --white: #fdf5ed;
@@ -241,6 +244,50 @@ createGlobalStyle`
   --syntax-number: #005cc5;
   --syntax-string: #aa1111;
   --syntax-method: #6f42c1;
+
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+ :root {
+  --black: #e6f0f6;
+  --orange: #ffab76;
+  --white: #20232a;
+  --red: #ff6a70;
+  --white-1: #32363e;
+  --white-2: #2c2f36;
+  --white-3: #25262b;
+  --gray-1: #bbc4c9;
+  --gray-2: #828b93;
+  --gray-3: #444b51;
+  --gray-3-half: rgba(68, 75, 81, 0.5019607843137255);
+  --white-unsafe: #1a1b1e;
+  --shadow-1: 1px 2px 3px var(--dark-gray-3-half);
+  --shadow-2: 2px 3px 5px var(--dark-gray-3-half);
+  --syntax-const: #ff7588;
+  --syntax-variable: #6ba4ff;
+  --syntax-number: #6ba4ff;
+  --syntax-string: #ff6670;
+  --syntax-method: #c7a8ff;
+
+  --scrollbar-background: #2b2f36;
+  --scrollbar-thumb: #50575e;
+  --scrollbar-thumb-hover: #6b7179;
+ }
+ ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+ }
+ ::-webkit-scrollbar-track {
+  background: var(--scrollbar-background);
+ }
+ ::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 3px solid var(--scrollbar-background);
+ }
+ ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+ }
 }
 * {
   box-sizing: border-box;
