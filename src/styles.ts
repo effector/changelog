@@ -266,6 +266,25 @@ createGlobalStyle`
   --syntax-number: #6ba4ff;
   --syntax-string: #ff6670;
   --syntax-method: #c7a8ff;
+
+  --scrollbar-background: #2b2f36;
+  --scrollbar-thumb: #50575e;
+  --scrollbar-thumb-hover: #6b7179;
+ }
+ ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+ }
+ ::-webkit-scrollbar-track {
+  background: var(--scrollbar-background);
+ }
+ ::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 3px solid var(--scrollbar-background);
+ }
+ ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
  }
 }
 * {
