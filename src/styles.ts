@@ -244,6 +244,8 @@ createGlobalStyle`
   --syntax-number: #005cc5;
   --syntax-string: #aa1111;
   --syntax-method: #6f42c1;
+
+  color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
  :root {
